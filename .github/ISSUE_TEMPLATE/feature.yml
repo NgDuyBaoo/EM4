@@ -1,0 +1,28 @@
+name: Chức năng / công việc
+description: Một chức năng hoặc công việc cần làm
+labels: [feature]
+body:
+  - type: input
+    id: req
+    attributes:
+      label: Mã yêu cầu
+      description: Mã trong docs/dac-ta-yeu-cau.md, ví dụ FR-U04, BR-06
+  - type: textarea
+    id: what
+    attributes:
+      label: Mô tả
+      placeholder: Là khách hàng, tôi muốn … để …
+    validations: { required: true }
+  - type: textarea
+    id: done
+    attributes:
+      label: Tiêu chí hoàn thành
+      value: |
+        - [ ] Chức năng chạy đúng
+        - [ ] Có test Pest
+        - [ ] Cập nhật tài liệu nếu đổi API/bảng
+  - type: dropdown
+    id: area
+    attributes:
+      label: Phần
+      options: [frontend (Blade/Livewire), backend (API/service), database, devops/CI, tài liệu]

@@ -1,0 +1,8 @@
+# Nhãn dùng cho Issues. Tạo bằng scripts/create-github-issues.sh
+- { name: feature, color: "7A4A2B", description: "Chức năng mới" }
+- { name: bug, color: "d73a4a", description: "Lỗi" }
+- { name: frontend, color: "F3DDBB", description: "Blade / Livewire / Tailwind" }
+- { name: backend, color: "3B2416", description: "API, service, database" }
+- { name: devops, color: "0e8a16", description: "CI/CD, Docker, giám sát" }
+- { name: docs, color: "c5def5", description: "Tài liệu" }
+- { name: "cần phân loại", color: "fbca04", description: "Issue mới chưa phân loại" }

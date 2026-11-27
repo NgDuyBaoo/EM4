@@ -1,0 +1,19 @@
+name: Báo lỗi
+description: Hệ thống chạy sai
+labels: [bug]
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện
+      placeholder: "1. Vào /dat-lich\n2. …"
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong đợi / thực tế
+    validations: { required: true }
+  - type: input
+    id: where
+    attributes:
+      label: Trình duyệt / thiết bị
