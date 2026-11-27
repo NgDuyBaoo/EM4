@@ -1,0 +1,42 @@
+# Mở rộng & tối ưu hiệu năng
+
+## Xử lý bất đồng bộ
+| Việc | Cách làm |
+|------|---------|
+| Gửi email xác nhận booking | `App\Jobs\SendBookingConfirmation` (ShouldQueue, thử lại 3 lần, backoff 10s/60s). Khách nhận kết quả ngay, không chờ SMTP |
+| Tự hủy booking quá giờ | Lệnh `bookings:cancel-no-shows`, scheduler chạy mỗi 5 phút (`routes/console.php`) |
+| Dọn dữ liệu giám sát | `telescope:prune`, `sanctum:prune-expired` hằng ngày |
+| Thu thập số liệu máy chủ | `pulse:check` chạy nền |
+Production dùng Redis cho queue; container `queue` và `scheduler` tách khỏi web để mở rộng độc lập.
+
+## Cache
+| Dữ liệu | Key | Thời gian | Xóa khi |
+|---------|-----|-----------|---------|
+| Danh mục chi nhánh + phòng | `catalog:branches` | 10 phút | Sửa chi nhánh/phòng (`CatalogObserver`) |
+| Lịch trống chi nhánh/ngày | `availability:{branch}:{date}` | 60 giây | Có booking thay đổi (`BookingObserver`) |
+| Mã truy cập hôm nay | `access-code:{date}` | đến 24:00 | Admin tạo mã mới |
+| Báo cáo thống kê | `report:{from}:{to}:{branch}` | 5 phút | Hết hạn |
+| Thời tiết Huế | `weather:hue:{giờ}` | 30 phút (lỗi: 5 phút) | Hết hạn |
+| Computed Livewire | `#[Computed(persist: true)]` | 10 phút | – |
+Trạng thái "đã qua giờ" luôn tính lại theo giờ hiện tại nên cache không làm sai lịch. Production: `CACHE_STORE=redis`;
+khởi động container chạy `config:cache`, `route:cache`, `view:cache`, `event:cache` (AUTORUN của image) và bật OPcache.
+
+## Tối ưu tải tài nguyên
+- Vite build, minify, đặt tên file theo hash (cache trình duyệt lâu dài); Tailwind 4 chỉ sinh class được dùng (CSS ~35 KB, gzip ~7 KB).
+- `Vite::prefetch()` tải trước asset; `wire:navigate` chuyển trang kiểu SPA (không tải lại CSS/JS).
+- Trang Thống kê dùng `#[Lazy]`: hiện khung chờ ngay, số liệu tải sau.
+- Ảnh VietQR `loading="lazy"` có `width/height` cố định (không giật layout); font Google có `preconnect` + `display=swap`.
+- Danh sách dùng phân trang (`paginate`), API giới hạn `per_page ≤ 100`; lịch tự làm mới bằng `wire:poll.30s` thay vì tải lại trang.
+
+## Tránh antipattern
+| Antipattern | Cách tránh | Kiểm chứng |
+|-------------|-----------|-----------|
+| N+1 query | Eager loading `with(['room','branch'])`, `withCount`, `withSum`; `Model::shouldBeStrict()` báo lỗi lazy-load khi dev/test | Test đếm số query trong `CatalogApiTest`, `BookingApiTest` |
+| Đếm/tổng trong vòng lặp PHP | `GROUP BY` + `SUM(CASE…)` 1 truy vấn trong `ReportService` | |
+| Chèn từng dòng | `Booking::insert()` theo lô 500 dòng trong seeder | |
+| Race condition đặt trùng | Chỉ số UNIQUE + transaction, `lockForUpdate()` khi đổi trạng thái | Test `database chặn trùng…` |
+| Mass assignment | `$fillable` rõ ràng; `role` không nằm trong fillable | |
+| Logic lặp ở nhiều nơi | Service dùng chung cho API và Livewire | |
+| Gọi API ngoài không giới hạn | `timeout(4)`, `retry(2)`, cache, có fallback | Test `Http::fake` |
+| Dò mã / mật khẩu | Rate limit `access-code`, `login`, `api` | Test khóa đăng nhập |
+| Truy vấn không index | Chỉ số theo đúng điều kiện lọc (xem `docs/database.md`) | Log truy vấn chậm |
