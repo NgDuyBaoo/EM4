@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ngói Photobooth – Quản lý</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6EFE6;--surface:#FFFBF6;--ink:#3B2416;--muted:#8A6F5C;--brand:#7A4A2B;--brand-ink:#FFF8F0;--line:#E4D6C6;--sel:#F3DDBB;
+--free:#EEF3ED;--booked:#F8EACE;--shoot:#DBE8F6;--cancel:#F6DFDD;--done:#E5E0DA;
+--sched-head:#F9F3EC;--sched-grid:#E9DCCE;--sched-time:#FBF7F2;--sched-shadow:rgba(122,74,43,.08);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1D140E;--surface:#2A1D14;--ink:#F3E6D6;--muted:#B49A82;--brand:#D9A06B;--brand-ink:#2A1608;--line:#4A3626;--sel:#4A3320;--free:#2F5A33;--booked:#7A5A22;--shoot:#2D4E73;--cancel:#7A3A36;--done:#4A4038;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1D140E;--surface:#2A1D14;--ink:#F3E6D6;--muted:#B49A82;--brand:#D9A06B;--brand-ink:#2A1608;--line:#4A3626;--sel:#4A3320;--free:#2F5A33;--booked:#7A5A22;--shoot:#2D4E73;--cancel:#7A3A36;--done:#4A4038;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 'Be Vietnam Pro',system-ui,sans-serif}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif;margin:0}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:var(--brand);color:var(--brand-ink)}
+.logo{font:700 30px/1 'Playfair Display',serif}.logo small{display:block;font:500 9px 'Be Vietnam Pro';letter-spacing:.3em}
+.tabs{display:flex;background:rgba(0,0,0,.18);border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;color:inherit;padding:6px 14px;border-radius:999px;font:500 13px inherit;cursor:pointer}
+.tabs button.on{background:var(--brand-ink);color:var(--brand)}
+main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+.steps{display:flex;gap:6px;margin-bottom:20px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--line)}.steps i.on{background:var(--brand)}
+h2{font-size:26px;margin-bottom:4px}.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.opt{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--surface);color:inherit;border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;cursor:pointer;font:inherit}
+.opt.on{border-color:var(--brand);background:var(--sel)}
+.ph{width:84px;height:64px;border-radius:10px;flex:none;background:linear-gradient(135deg,#C9A27A,#7A4A2B)}
+.opt b{display:block;font-size:16px}.opt span{color:var(--muted);font-size:13px}
+.btn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:12px 22px;font:600 15px inherit;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}.btn.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.code{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.code input{width:46px;height:56px;text-align:center;font:600 24px 'Playfair Display',serif;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+input.f,select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:10px}
+.hint{font-size:12.5px;color:var(--muted);text-align:center}.err{color:#C0392B;text-align:center;min-height:22px;font-size:13.5px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;max-height:340px;overflow:auto;padding:2px}
+.slot{padding:10px 0;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:500 14px inherit;cursor:pointer}
+.slot.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.slot:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+dl{display:grid;grid-template-columns:90px 1fr;gap:8px 12px;margin:0}dt{color:var(--muted)}dd{margin:0;font-weight:500}
+.ok{width:72px;height:72px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-size:36px;margin:0 auto 12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat b{font:700 26px 'Playfair Display',serif;display:block}.stat span{color:var(--muted);font-size:13px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin:10px 0}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.scroll{overflow-x:auto;max-height:300px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.g td.c{height:26px;border-left:2px solid var(--bg)}
+.pill{padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:500;color:#2B1B10}
+.s-booked{background:var(--booked)}.s-shoot{background:var(--shoot)}.s-cancel{background:var(--cancel)}.s-done{background:var(--done)}
+td button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:4px 9px;margin-right:4px;font:inherit;font-size:12.5px;cursor:pointer}
+.hide{display:none}
+header{position:relative;margin-bottom:16px;background:radial-gradient(circle at 11px 0,transparent 8px,rgba(255,248,240,.14) 8.5px 9.5px,transparent 10px) 0 0/22px 11px,var(--brand)}
+header::after{content:"";position:absolute;left:0;right:0;top:100%;height:11px;background:radial-gradient(circle at 11px 0,var(--brand) 10px,transparent 10.5px) 0 0/22px 11px}
+.logo{font-size:34px;letter-spacing:-.01em}
+h2{font-size:30px;line-height:1.2;letter-spacing:-.01em}
+.sub{font-size:14.5px;max-width:56ch}
+main{padding-top:24px}
+.card{border-radius:20px;padding:20px;box-shadow:0 10px 30px -18px rgba(59,36,22,.45)}
+.btn{border-radius:12px;padding:14px 26px;box-shadow:0 8px 18px -10px var(--brand);transition:transform .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+input.f:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--sel)}
+button:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.stat{padding:16px 18px}.stat b{font-size:30px}
+td button{transition:background .15s}td button:hover{background:var(--sel)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Admin usability upgrade */
+main{max-width:1180px}.admin-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}.admin-top h2{margin:0}.admin-top .sub{margin:4px 0 0}.admin-tools{display:flex;gap:8px;flex-wrap:wrap}.btn-sm{padding:9px 14px!important;font-size:13px!important;box-shadow:none!important}.btn-lite{background:transparent;color:var(--brand);border:1px solid var(--line);box-shadow:none}.btn-lite:hover{background:var(--sel)}.admin-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 16px}.admin-controls label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}.admin-controls select,.admin-controls input{margin:0}.admin-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 16px}.admin-tabs button{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 13px 'Be Vietnam Pro',sans-serif;cursor:pointer}.admin-tabs button.active{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 10px}.section-head h3{font-size:20px}.schedule-wrap{max-height:480px;overflow:auto;border:1px solid var(--line);border-radius:12px}.schedule{border-collapse:separate;border-spacing:0;min-width:500px}.schedule th{position:sticky;top:0;background:var(--surface);z-index:2}.schedule td:first-child,.schedule th:first-child{position:sticky;left:0;background:var(--surface);z-index:1}.schedule th:first-child{z-index:3}.schedule td{padding:0!important;border-bottom:1px solid var(--line)}.schedule .time-col{padding:8px!important;font-size:12px;font-weight:600}.schedule-cell{width:100%;min-height:35px;border:0;border-left:2px solid var(--surface);background:var(--free);color:#30251b;cursor:pointer;font:500 11px 'Be Vietnam Pro',sans-serif;white-space:nowrap}.schedule-cell.booked{background:var(--booked)}.schedule-cell.shoot{background:var(--shoot)}.schedule-cell.cancel{background:var(--cancel)}.schedule-cell.done{background:var(--done)}.schedule-cell:hover,.schedule-cell:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;filter:brightness(.95)}.booking-filters{display:grid;grid-template-columns:minmax(160px,2fr) minmax(120px,1fr);gap:10px;margin:0 0 12px}.booking-filters input,.booking-filters select{margin:0}.booking-list{max-height:460px;overflow:auto}.booking-list table{min-width:740px}.booking-list tr:hover td{background:var(--sel)}.action-btn{padding:6px 10px!important;margin:2px!important}.action-btn.danger{color:#a0322c;border-color:#d9a39d}.empty-state{text-align:center;padding:25px;color:var(--muted)}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.detail-grid div{background:var(--bg);padding:10px;border-radius:9px}.detail-grid small{display:block;color:var(--muted);font-size:11px}.detail-grid b{font-size:13px}.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.notice{color:var(--muted);font-size:12px;margin:6px 0 0}.stat{box-shadow:none}.stat b{font-family:'Be Vietnam Pro',sans-serif;font-size:25px}.card{box-shadow:0 5px 18px -15px rgba(59,36,22,.5)}
+@media(max-width:650px){header{padding:12px 14px}.logo{font-size:27px}main{padding:14px 12px 40px}.admin-controls{grid-template-columns:1fr 1fr}.admin-controls>div:first-child{grid-column:1/-1}.booking-filters{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{padding:12px}.stat b{font-size:22px}.detail-grid{grid-template-columns:1fr}.admin-tools .btn{flex:1}.card{padding:14px}.schedule-wrap{max-height:380px}}
+
+/* Thanh điều hướng quản lý: text-only, hover nhẹ và gạch chân mục đang mở */
+header .tabs{
+  display:flex;align-items:center;justify-content:flex-end;gap:5px;
+  padding:0;border:0;border-radius:0;background:transparent;flex-shrink:0;
+}
+header .tabs button{
+  appearance:none;position:relative;display:inline-flex;align-items:center;justify-content:center;
+  min-height:42px;padding:10px 15px;border:1px solid transparent;border-radius:10px;
+  background:transparent;color:var(--brand-ink);box-shadow:none;
+  font:600 13.5px/1.3 'Be Vietnam Pro',sans-serif;white-space:nowrap;
+  cursor:pointer;transition:background .16s ease,color .16s ease;
+}
+header .tabs button:hover{background:rgba(255,248,240,.18);color:#fffaf4}
+header .tabs button.on{background:transparent;color:var(--brand-ink)}
+header .tabs button.on::after{
+  content:"";position:absolute;left:16px;right:16px;bottom:5px;
+  height:2px;border-radius:2px;background:var(--brand-ink);
+}
+header .tabs button.on:hover{background:rgba(255,248,240,.18)}
+header .tabs button:focus-visible{outline:2px solid var(--brand-ink);outline-offset:2px}
+@media(max-width:480px){
+  header{gap:7px;padding:11px 11px}
+  header .logo{font-size:26px}
+  header .tabs{gap:1px}
+  header .tabs button{font-size:12px;padding:9px 9px;min-height:40px}
+  header .tabs button.on::after{left:9px;right:9px;bottom:5px}
+}
+@media(prefers-reduced-motion:reduce){header .tabs button{transition:none}}
+
+
+/* Booking workspace: list and contextual detail */
+.booking-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+.booking-workspace.has-detail{grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr)}
+.booking-main{min-width:0}.booking-side{min-width:0;position:sticky;top:12px}
+.booking-list{max-height:560px}.booking-list table{min-width:610px}.booking-list th{position:sticky;top:0;background:var(--surface);z-index:1}
+.booking-list tr.selected td{background:var(--sel)!important}.booking-list td{vertical-align:middle}.booking-list .booking-code{font-size:12px;color:var(--muted)}
+.booking-list .customer-name{font-weight:600}.booking-list .booking-time{font-weight:600;font-variant-numeric:tabular-nums}
+.booking-list .row-actions{display:flex;gap:5px;align-items:center}.booking-list .row-actions button{white-space:nowrap}
+.booking-list .action-btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.booking-detail-card{margin:0!important;padding:18px!important;border-color:var(--brand)}
+.booking-detail-card .detail-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.booking-detail-card .detail-heading h3{font-size:21px;margin:0}.booking-detail-card .detail-heading p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.booking-detail-card .detail-summary{background:var(--bg);border-radius:12px;padding:13px;margin-bottom:14px}
+.booking-detail-card .detail-summary strong{display:block;font-size:18px}.booking-detail-card .detail-summary .pill{display:inline-block;margin-top:7px}
+.booking-detail-card .detail-section-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:13px 0 8px}
+.booking-detail-card .detail-grid{gap:8px}.booking-detail-card .detail-grid div{padding:9px 11px;border:1px solid var(--line);background:var(--surface)}
+.booking-detail-card .detail-grid b{display:block;overflow-wrap:anywhere}.booking-detail-card .detail-actions{border-top:1px solid var(--line);padding-top:13px;margin-top:15px}
+.booking-detail-card .detail-actions .btn{flex:1;min-width:110px}.booking-detail-card .detail-actions .danger{color:#a0322c;border-color:#d9a39d}
+.booking-detail-placeholder{border:1px dashed var(--line);border-radius:14px;padding:24px;text-align:center;color:var(--muted);background:var(--surface)}
+@media(max-width:920px){.booking-workspace.has-detail{grid-template-columns:minmax(0,1fr)}.booking-side{position:static}.booking-list{max-height:420px}}
+@media(max-width:650px){.booking-detail-card .detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-detail-card .detail-actions .btn{min-width:0}.booking-list{max-height:370px}}
+
+/* Lịch phòng đa chi nhánh: tự thay đổi số cột và giờ theo cấu hình */
+.admin-main-nav{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:4px 0 20px;padding:4px;border-bottom:1px solid var(--line)}
+.admin-nav-tab{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:10px 15px;border:1px solid transparent;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;background:transparent;color:var(--muted);font:600 13px 'Be Vietnam Pro',sans-serif;cursor:pointer}
+.admin-nav-tab:hover{color:var(--ink);background:var(--sel)}.admin-nav-tab.active{border-bottom-color:var(--brand);color:var(--brand);background:var(--surface)}
+.nav-count{border-radius:100px;background:var(--sel);color:var(--brand);padding:1px 7px;font-size:11px}
+.branch-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 12px}
+.branch-chip{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;min-height:98px;padding:13px 17px;border:1.5px solid var(--line);border-radius:14px;text-align:left;background:var(--surface);color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s}
+.branch-chip span{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.branch-chip strong{font-size:15px;font-weight:600;line-height:1.4}.branch-chip small{font-size:12px;color:var(--muted)}
+.branch-chip.active{background:var(--sel);border-color:var(--brand);box-shadow:inset 4px 0 0 var(--brand)}
+.branch-chip.active span,.branch-chip.active small{color:var(--brand)}
+.branch-chip:hover{border-color:var(--brand)}
+.branch-summary{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:4px}
+.admin-schedule-controls{grid-template-columns:repeat(3,minmax(0,1fr))}
+.schedule{table-layout:fixed;width:100%}.schedule th{font-size:12px;white-space:normal;text-align:center;padding:12px 7px;border-bottom:1px solid var(--line)}
+.schedule .time-col{width:95px;text-align:center;font-variant-numeric:tabular-nums;background:var(--surface)}
+.schedule th:first-child{width:95px}.schedule th .room-head-name{display:block;white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+.schedule th small{display:block;color:var(--muted);font-size:10px;font-weight:400;margin-top:3px}
+.schedule-cell{display:flex;align-items:center;justify-content:center;padding:6px 8px;min-height:38px;text-overflow:ellipsis;overflow:hidden;max-width:100%;font-size:11px}
+.schedule-cell.offhours{background:var(--bg);color:var(--muted);cursor:default;opacity:.5}
+.schedule-wrap{background:var(--surface);max-height:510px;border-radius:12px}
+.schedule td:first-child,.schedule th:first-child{z-index:3}.schedule th:first-child{z-index:5}
+.room-config-list{display:grid;gap:12px}.room-config-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:17px}
+.room-config-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.room-config-top b{display:block;font-size:16px}.small-kicker{display:block;color:var(--muted);font-size:10px;letter-spacing:.1em}
+.room-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--brand);font-weight:600;cursor:pointer}.room-toggle input{width:17px;height:17px;accent-color:var(--brand)}
+.room-fields{display:grid;grid-template-columns:1.25fr 1.25fr 1fr 1fr 1fr;gap:10px}
+.room-fields label,.hours-fields label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
+.room-fields input,.hours-fields input{margin-bottom:0}
+.room-config-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px}
+.text-action{border:0;background:transparent;color:var(--brand);font:500 12px 'Be Vietnam Pro',sans-serif;cursor:pointer;padding:5px 0}
+.text-action.danger{color:#a0322c}.text-action:hover{text-decoration:underline}
+.settings-summary{margin-bottom:18px}.settings-summary-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.settings-summary h3{font-size:21px}
+.settings-demo{color:var(--muted);font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:4px 9px}
+.hours-fields{display:grid;grid-template-columns:repeat(2,minmax(0,240px));gap:12px;margin:15px 0 10px}
+.settings-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:16px 0}
+.settings-actions{display:flex;flex-wrap:wrap;gap:8px}
+@media(max-width:780px){.room-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.branch-chip strong{font-size:13px}.admin-schedule-controls{grid-template-columns:1fr 1fr}.admin-schedule-controls>div:last-child{grid-column:1/-1}}
+@media(max-width:540px){.branch-switch{gap:6px}.branch-chip{padding:11px;min-height:112px}.branch-chip strong{font-size:12px}.branch-chip small{font-size:10px}.branch-summary{font-size:12px}.room-fields{grid-template-columns:1fr 1fr}.hours-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-main-nav{flex-wrap:nowrap;overflow-x:auto}.admin-nav-tab{white-space:nowrap;flex-shrink:0;font-size:12px;padding:10px 12px}.room-config-card{padding:13px}.schedule-wrap{max-height:440px}}
+
+
+/* Booking directory and cross-check layout */
+.schedule-directory-link{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:18px 0;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.schedule-directory-link strong{font-size:15px}.schedule-directory-link .notice{margin:4px 0 0}
+.compare-action{border-color:var(--brand)!important;color:var(--brand)!important;white-space:nowrap}
+.booking-list .row-actions{display:flex;flex-wrap:wrap;gap:4px}
+.booking-list th{position:sticky;top:0;background:var(--surface);z-index:1}
+@media(max-width:650px){.schedule-directory-link{flex-direction:column;align-items:stretch}.schedule-directory-link button{width:100%}.admin-main-nav{overflow-x:auto;flex-wrap:nowrap!important}.admin-nav-tab{white-space:nowrap}}
+
+/* Schedule readability refresh */
+.schedule-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 12px}
+.schedule-hint{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.schedule-hint strong{color:var(--ink);font-weight:600}
+.legend.schedule-legend{gap:8px;margin:0}
+.legend.schedule-legend span{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12px;color:var(--ink)}
+.legend.schedule-legend i{width:10px;height:10px;margin:0;border-radius:999px;flex:none}
+.schedule-shell{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 5px 18px -15px rgba(59,36,22,.45)}
+.schedule-wrap{background:var(--sched-time)!important;border:1px solid var(--sched-grid)!important;border-radius:14px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.schedule{table-layout:fixed;width:100%;border-collapse:separate;border-spacing:0}
+.schedule thead th{background:var(--sched-head)!important;color:var(--ink);font-size:12px;font-weight:600;letter-spacing:.01em;border-bottom:1px solid var(--sched-grid)}
+.schedule th,.schedule td{border-color:var(--sched-grid)!important}
+.schedule th:first-child,.schedule td:first-child{box-shadow:2px 0 0 rgba(122,74,43,.03)}
+.schedule .time-col{width:88px;background:var(--sched-time)!important;color:var(--brand);font-size:12px;font-weight:700;letter-spacing:.02em}
+.schedule tbody tr:nth-child(even) .time-col{background:var(--sched-time-alt)!important}
+.schedule td{background:var(--sched-td)}
+.schedule tbody tr:hover td{background:rgba(122,74,43,.015)}
+.schedule-cell{position:relative;display:flex;align-items:center;justify-content:flex-start;text-align:left;padding:8px 10px 8px 12px;min-height:44px;border-left:0!important;font-size:12px;line-height:1.35;font-weight:500;background:var(--sched-cell);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(122,74,43,.06);transition:background .15s,box-shadow .15s,transform .12s}
+.schedule-cell::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#D9C8B6;opacity:.9}
+.schedule-cell.free{justify-content:center;color:var(--muted);background:var(--sched-free);font-weight:600;font-size:16px}
+.schedule-cell.free::before{background:#D8D4CD}
+.schedule-cell.booked{background:var(--booked)}
+.schedule-cell.booked::before{background:#D7A252}
+.schedule-cell.shoot{background:var(--shoot)}
+.schedule-cell.shoot::before{background:#6E9ECD}
+.schedule-cell.done{background:var(--done)}
+.schedule-cell.done::before{background:#9C8F84}
+.schedule-cell.cancel{background:var(--cancel)}
+.schedule-cell.cancel::before{background:#C8817E}
+.schedule-cell.offhours{justify-content:center;background:repeating-linear-gradient(135deg,var(--sched-off1) 0 10px,var(--sched-off2) 10px 20px)!important;color:var(--muted);opacity:1;box-shadow:none}
+.schedule-cell.offhours::before{display:none}
+.schedule-cell:hover,.schedule-cell:focus-visible{outline:none;box-shadow:inset 0 0 0 1px rgba(122,74,43,.12),0 0 0 2px rgba(122,74,43,.08)}
+.schedule-cell:hover{transform:none}
+.schedule-note-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0 0}
+.schedule-note{padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.schedule-note b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:3px}
+@media(max-width:650px){.schedule-shell{padding:10px}.legend.schedule-legend span{padding:6px 8px;font-size:11.5px}.schedule .time-col,.schedule th:first-child{width:76px}.schedule-cell{min-height:42px;padding:7px 8px 7px 10px;font-size:11.5px}.schedule-note-grid{grid-template-columns:1fr}}
+
+/* Password settings: focused, centered and responsive layout */
+.password-page{width:100%;max-width:560px;margin:34px auto 56px;padding:0 6px}
+.password-heading{text-align:center;margin-bottom:22px}
+.password-icon{width:54px;height:54px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:18px;background:var(--sel);color:var(--brand);margin-bottom:13px}
+.password-heading h2{font-size:31px;line-height:1.2}
+.password-heading .sub{max-width:440px;margin:8px auto 0;font-size:13.5px;line-height:1.6}
+.password-card{padding:26px 30px 28px;border-radius:19px}
+.pw-account{display:flex;align-items:center;gap:12px;padding:13px 14px;margin-bottom:23px;background:var(--bg);border:1px solid var(--line);border-radius:13px}
+.pw-account-icon{width:39px;height:39px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--brand);color:var(--brand-ink);font:700 20px 'Playfair Display',serif;flex:none}
+.pw-account div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pw-account .pw-caption{font-size:11.5px;color:var(--muted)}
+.pw-account strong{font-size:13.5px;overflow-wrap:anywhere}
+.pw-fields{display:grid;gap:16px}
+.pw-field label{display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--ink)}
+.pw-field input.f{display:block;width:100%;height:48px;margin:0;padding:10px 13px;background:var(--surface);border-radius:11px}
+.pw-helper{margin:9px 0 12px;font-size:12px;color:var(--muted);line-height:1.6}
+.pw-check{display:inline-flex;align-items:center;gap:9px;padding:5px 0;font-size:13px;color:var(--ink);cursor:pointer}
+.pw-check input{width:17px;height:17px;margin:0;accent-color:var(--brand)}
+.pw-message{font-size:12.5px;line-height:1.5;text-align:left;color:var(--danger,#b93f31)}
+.pw-message:not(:empty){padding:10px 12px;margin-top:12px;background:var(--bg);border-radius:9px;border:1px solid var(--line)}
+.pw-actions{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:10px;margin-top:18px}
+.pw-actions .btn{min-height:46px;padding:10px 12px;font-size:13.5px;box-shadow:none}
+.pw-logout{background:transparent;border-color:var(--line);color:var(--brand)}
+.pw-logout:hover:not(:disabled){background:var(--sel)}
+.pw-return{display:block;margin:17px auto 0;background:none;border:0;border-radius:8px;padding:9px 13px;font:500 13px 'Be Vietnam Pro',sans-serif;color:var(--brand);cursor:pointer}
+.pw-return:hover{background:var(--sel)}
+@media(max-width:600px){.password-page{margin:20px auto 35px;padding:0}.password-heading{margin-bottom:17px}.password-heading h2{font-size:27px}.password-card{padding:19px 17px 22px}.pw-account{margin-bottom:19px}.pw-actions{grid-template-columns:1fr}.pw-actions .btn{width:100%}}
+
+/* Fix: cuộn dọc trang bình thường khi trỏ chuột lên lịch phòng.
+   Lịch tự tăng chiều cao theo số dòng, chỉ cuộn ngang khi có nhiều phòng. */
+.schedule-wrap {
+  max-height: none !important;
+  height: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-y: auto;
+}
+
+
+/* Đặt lịch khách đến trực tiếp - popup rõ ràng, thân thiện với điện thoại */
+body.walkin-open{overflow:hidden}
+.walkin-host:empty{display:none}
+.walkin-overlay{position:fixed;inset:0;z-index:200;background:rgba(40,28,19,.53);display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto}
+.walkin-dialog{width:100%;max-width:520px;max-height:min(92vh,900px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 22px 60px rgba(40,25,14,.23);padding:22px 24px}
+.walkin-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.walkin-top h3{font:700 24px/1.25 'Playfair Display',Georgia,serif;margin:3px 0 0}
+.walkin-kicker{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--brand);text-transform:uppercase}
+.walkin-close{border:0;background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px;display:grid;place-items:center;font:500 22px/1 Arial,sans-serif;cursor:pointer;flex:none}
+.walkin-close:hover{background:var(--sel)}
+.walkin-summary{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:13px 14px;margin-bottom:15px;display:grid;grid-template-columns:1fr 1fr;gap:9px 12px}
+.walkin-summary small{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}
+.walkin-summary strong{font-size:13px;line-height:1.45;display:block;overflow-wrap:anywhere}
+.walkin-field{margin-bottom:12px}
+.walkin-field label{display:block;font-weight:600;color:var(--ink);font-size:13px;margin-bottom:5px}
+.walkin-field input,.walkin-field select,.walkin-field textarea{width:100%;border:1.5px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);padding:11px 12px;font:inherit;font-size:14px;margin:0}
+.walkin-field textarea{min-height:64px;resize:vertical}
+.walkin-field input:focus,.walkin-field select:focus,.walkin-field textarea:focus{outline:2px solid var(--sel);border-color:var(--brand)}
+.walkin-help{display:block;color:var(--muted);font-size:11.5px;margin-top:4px}
+.walkin-err{color:#A4362E;font-size:12.5px;min-height:0;margin:0 0 8px}
+.walkin-err:empty{display:none}
+.walkin-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:15px}
+.walkin-actions .btn{box-shadow:none;min-height:44px;padding:10px 18px;font-size:13.5px}
+.walkin-badge{font-size:11px;font-weight:600;color:var(--brand);background:var(--sel);border:1px solid var(--line);padding:2px 7px;border-radius:8px;margin-left:5px;white-space:nowrap}
+@media(max-width:560px){.walkin-overlay{padding:10px;align-items:center}.walkin-dialog{padding:18px 16px;border-radius:16px;max-height:94vh}.walkin-top h3{font-size:22px}.walkin-summary{grid-template-columns:1fr 1fr}.walkin-actions .btn{flex:1;padding:10px 8px}.walkin-field{margin-bottom:9px}}
+
+/* Chi tiet booking: popup tren viewport, khong cuon trang xuong duoi */
+body.booking-detail-open{overflow:hidden}
+.booking-detail-host:empty{display:none}
+.booking-detail-overlay{position:fixed;inset:0;z-index:190;display:flex;justify-content:center;align-items:center;padding:22px;background:rgba(41,29,21,.54);backdrop-filter:blur(2px);overflow:hidden}
+.booking-detail-dialog{position:relative;width:min(100%,620px);max-height:min(90vh,860px);max-height:min(90dvh,860px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;background:var(--surface);border-radius:20px;box-shadow:0 25px 75px rgba(26,13,5,.3);outline:none}
+.booking-detail-dialog .booking-detail-card{border:0!important;border-radius:20px;padding:24px!important;box-shadow:none!important}
+.booking-detail-dialog .booking-detail-card .detail-heading{position:relative}
+.booking-detail-dialog .detail-summary{padding:15px}
+.booking-detail-dialog .detail-actions{position:sticky;bottom:-24px;z-index:1;margin:16px -24px -24px;padding:14px 24px 20px;background:var(--surface);border-top:1px solid var(--line)}
+.booking-detail-dialog .detail-actions .btn{min-height:43px}
+.booking-detail-dialog .detail-heading button{white-space:nowrap}
+.booking-detail-dialog .detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.booking-detail-dialog .detail-grid b{font-size:13px}
+.schedule-cell.focus-booking{outline:2px solid var(--brand)!important;outline-offset:-2px!important;box-shadow:inset 0 0 0 2px var(--brand)!important}
+@media(max-width:620px){
+ .booking-detail-overlay{align-items:flex-end;padding:0}
+ .booking-detail-dialog{width:100%;max-height:92vh;max-height:92dvh;border-radius:20px 20px 0 0;scrollbar-gutter:auto}
+ .booking-detail-dialog .booking-detail-card{padding:20px 16px 22px!important;border-radius:20px 20px 0 0}
+ .booking-detail-dialog .detail-actions{bottom:-22px;margin:16px -16px -22px;padding:12px 16px 22px}
+ .booking-detail-dialog .detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .booking-detail-dialog .detail-actions .btn{flex:1 1 calc(50% - 9px);min-width:0}
+}
+@media(max-width:370px){.booking-detail-dialog .detail-grid{grid-template-columns:1fr}}
+.booking-list tr.booking-selectable{cursor:pointer}
+.booking-list tr.booking-selectable:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.booking-list tr.booking-selectable:hover td{background:var(--sel)}
+
+/* Ẩn/hiện lịch đã qua: giao diện nhẹ, đồng nhất giữa lịch phòng và danh sách */
+.past-toggle-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:5px 0 12px}
+.past-toggle-copy{font-size:12.5px;color:var(--muted);line-height:1.5}
+.past-toggle-copy strong{font-weight:600;color:var(--ink)}
+.past-toggle{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:39px;white-space:nowrap;padding:9px 14px;border:1px solid var(--brand);border-radius:10px;background:var(--surface);color:var(--brand);font:600 12.5px/1.4 'Be Vietnam Pro',sans-serif;cursor:pointer;box-shadow:none;transition:background .15s,color .15s,border-color .15s}
+.past-toggle:hover{background:var(--sel)}
+.past-toggle[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.past-toggle[aria-pressed="true"]:hover{filter:brightness(1.08)}
+.past-toggle svg{width:16px;height:16px;flex:none}
+.past-count{font-size:11px;font-weight:600;border-radius:999px;background:var(--sel);color:var(--brand);padding:2px 7px}
+.past-toggle[aria-pressed="true"] .past-count{background:rgba(255,255,255,.22);color:var(--brand-ink)}
+.schedule-empty-past{padding:22px;text-align:center;color:var(--muted);font-size:13px}
+.schedule-past-row td:not(.time-col){background:var(--sched-past)}
+.schedule-past-row .time-col{color:var(--muted)!important}
+.booking-past-row td{background:rgba(217,210,202,.17)}
+.booking-past-row .booking-time::after{content:"Đã qua";display:block;font-size:10px;font-weight:500;color:var(--muted)}
+@media(max-width:650px){.past-toggle-row{align-items:stretch}.past-toggle{width:100%}.past-toggle-copy{flex:1}}
+
+/* Ảnh sau khi chụp: không tạo link giả, quản lý trong chi tiết booking */
+.booking-photo-panel{border:1px solid var(--line);border-radius:14px;padding:15px;margin:14px 0 3px;background:var(--photo-bg)}
+.booking-photo-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.booking-photo-head strong{font-size:14px;color:var(--ink)}
+.booking-photo-desc{font-size:12.5px;line-height:1.55;color:var(--muted);margin:5px 0 12px}
+.booking-photo-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.booking-photo-actions .btn{min-height:39px;padding:9px 14px;font-size:12.5px;box-shadow:none;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.booking-photo-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--muted);background:var(--surface);border-radius:8px;padding:8px 10px;margin-bottom:10px}
+.booking-photo-input{display:block;width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;font:inherit;color:var(--ink);padding:11px 12px;margin:7px 0 9px}
+.booking-photo-input:focus{outline:2px solid var(--sel);border-color:var(--brand)}
+.booking-photo-error{font-size:12px;color:#B03930;margin:5px 0 10px}
+.booking-photo-error:empty{display:none}
+@media(max-width:620px){.booking-photo-panel{padding:12px}.booking-photo-actions .btn{flex:1 1 auto}}
+/* ===== Làm mới giao diện: màu nhấn, header phẳng, pill dịu, công tắc sáng/tối ===== */
+:root{--accent:#B85A25;--accent-ink:#FFFFFF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--accent:#E08A4F;--accent-ink:#2A1608}}
+:root[data-theme="dark"]{--accent:#E08A4F;--accent-ink:#2A1608}
+header{background:var(--brand);border-bottom:1px solid rgba(0,0,0,.12)}
+header::after{display:none}
+.btn:not(.ghost){background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 18px -12px var(--accent)}
+.btn:not(.ghost):disabled{opacity:.45}
+.steps i.on{background:var(--accent)}
+.slot.on,.compact-slots .slot.on:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt.on{border-color:var(--accent);box-shadow:0 0 0 4px var(--sel)}
+.opt.on::after,.ok{background:var(--accent);color:var(--accent-ink)}
+.ph,.opt:nth-of-type(even) .ph{transform:none;border:0;border-radius:14px;box-shadow:0 6px 16px -8px rgba(59,36,22,.45)}
+.stat b,.stat strong{font-family:'Be Vietnam Pro',system-ui,sans-serif;font-weight:700;letter-spacing:-.02em}
+.pill{position:relative;padding:3px 11px 3px 23px;background:var(--surface)!important;border:1px solid var(--line);color:var(--ink)}
+.pill::before{content:"";position:absolute;left:9px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--dot,var(--muted))}
+.s-booked{--dot:#E5A23A}.s-shoot{--dot:#4A90D9}.s-cancel{--dot:#D9534F}.s-done{--dot:#9A8F84}
+.theme-btn{border:1px solid currentColor;background:none;color:var(--brand-ink);border-radius:10px;padding:7px 11px;font-size:14px;line-height:1;cursor:pointer}
+:root{--sched-time-alt:#F7F1EA;--sched-td:rgba(255,255,255,.35);--sched-cell:#fff;--sched-free:#FFFCF8;--sched-off1:#F4EEE8;--sched-off2:#F8F3EE;--sched-past:#faf7f3;--photo-bg:#FCF8F2;--danger:#a0322c;--danger-line:#d9a39d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sched-head:#33251A;--sched-grid:#4A3626;--sched-time:#241911;--sched-time-alt:#2A1D14;--sched-td:transparent;--sched-cell:#2A1D14;--sched-free:#261A12;--sched-off1:#211710;--sched-off2:#2A1D14;--sched-past:#221811;--photo-bg:#241911;--danger:#F08A80;--danger-line:#7A3A36}}
+:root[data-theme="dark"]{--sched-head:#33251A;--sched-grid:#4A3626;--sched-time:#241911;--sched-time-alt:#2A1D14;--sched-td:transparent;--sched-cell:#2A1D14;--sched-free:#261A12;--sched-off1:#211710;--sched-off2:#2A1D14;--sched-past:#221811;--photo-bg:#241911;--danger:#F08A80;--danger-line:#7A3A36}
+/* Nút viền nhẹ: không bị tô cam bởi kiểu .btn chung */
+.btn.btn-lite{background:transparent;color:var(--brand);border:1px solid var(--line);box-shadow:none}
+.btn.btn-lite:hover:not(:disabled){background:var(--sel)}
+.btn.btn-lite.danger,.action-btn.danger,.text-action.danger{color:var(--danger);border-color:var(--danger-line)}
+.text-action.danger{border:0}
+.demo-banner{display:flex;gap:8px;align-items:flex-start;margin:0 0 16px;padding:10px 13px;border:1px dashed var(--line);border-radius:12px;background:var(--surface);color:var(--muted);font-size:12.5px;line-height:1.5}
+.demo-banner b{color:var(--ink);font-weight:600}
+:root[data-theme="dark"] .schedule-cell.free::before{background:var(--line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .schedule-cell.free::before{background:var(--line)}}
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script></head><body>
+<header><div class="logo">Ngói<small>PHOTOBOOTH</small></div>
+<nav class="tabs" aria-label="Điều hướng quản trị"><button type="button" id="hM" class="on" aria-pressed="true" title="Mở trang quản lý" onclick="A.page='';render()">Quản lý</button><button type="button" id="hP" style="display:none" aria-pressed="false" title="Đổi mật khẩu tài khoản" onclick="A.page='pw';render()">Đổi mật khẩu</button></nav></header>
+<main><div id="app"></div></main><div id="walkin-host" class="walkin-host"></div><div id="booking-detail-host" class="booking-detail-host"></div><div id="confirm-host"></div>
+<script src="firebase-config.js"></script>
+<script src="ngoi-store.js"></script>
+<script>
+// Toàn bộ dữ liệu (phòng, giờ, booking, lời nhắn, mật khẩu) dùng chung với trang Đặt lịch qua ngoi-store.js.
+const NS=window.NgoiStore;
+const BR=NS.BRANCHES;
+const ST={booked:['Đã đặt','s-booked'],shoot:['Đang chụp','s-shoot'],cancel:['Đã hủy','s-cancel'],done:['Hoàn thành','s-done']};
+const pad=n=>String(n).padStart(2,'0');let TODAY='',dlabel='';
+const dowN=['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
+let DB,BRANCH_CONFIG,RM=[],bookings=[],FB=[];
+// Ngày tính lại mỗi lần đồng bộ: trang mở qua nửa đêm tự sang ngày mới.
+function sync(){const d=new Date();TODAY=NS.today();dlabel=dowN[d.getDay()]+', '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();DB=NS.load();BRANCH_CONFIG=DB.config;RM=NS.rooms(DB);bookings=DB.bookings.filter(x=>x.date===TODAY);FB=DB.messages}
+sync();
+const findBk=(db,id)=>db.bookings.find(x=>x.id===id);
+const getRooms=(b,includeOff=false)=>(BRANCH_CONFIG[b]?.rooms||[]).filter(r=>includeOff||r.active);
+const getCfg=b=>BRANCH_CONFIG[b];
+const minutes=NS.minutes,tstr=NS.tstr;
+function timeRange(start,end){return NS.times(start,end)}
+function periodsFor(b){const c=getCfg(b),a=[['all','Cả ngày']];for(let n=minutes(c.open);n<minutes(c.close);n+=120)a.push([tstr(n),tstr(n)+'–'+tstr(Math.min(n+120,minutes(c.close)))]);return a}
+function roomAvailable(r,t,b){return NS.roomAvailable(DB,b,r,t)}
+function switchBranch(b){A.br=b;UI.window='all';UI.room='all';UI.detail=null;A.q='';render()}
+function validPhotoUrl(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)&&!!u.hostname&&!/^(?:photos\.)?example\.com$/i.test(u.hostname)}catch(e){return false}}
+function persistPhotoLink(x){NS.update(db=>{const y=findBk(db,x.id);if(!y)return;if(x.link&&validPhotoUrl(x.link))y.link=x.link;else delete y.link});sync()}
+
+let UI={window:'all',room:'all',status:'all',search:'',detail:null,showPast:false,photoEdit:null,photoError:''};
+let A={in:false,br:'b1',err:''};
+const $=s=>document.getElementById(s),by=(l,i)=>l.find(x=>x.id===i);
+// Mỗi slot kéo dài 10 phút. Chỉ xem là đã qua khi slot kết thúc hẳn.
+// Dùng đồng hồ thời gian thực, không dùng biến `now` cố định lúc mở trang.
+const localDay=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+function slotEnded(t,date=TODAY){
+ const d=new Date(),day=localDay(d);
+ if(date<day)return true;
+ if(date>day)return false;
+ return minutes(t)+10 <= d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
+}
+function setShowPast(show){UI.showPast=!!show;render()}
+function pastToggle(count){
+ const shown=UI.showPast;
+ return `<button type="button" class="past-toggle" aria-pressed="${shown}" onclick="setShowPast(${!shown})" title="${shown?'Ẩn khung giờ đã kết thúc':'Hiển thị lại các khung giờ đã kết thúc để kiểm tra'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shown?'<path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.3A10.9 10.9 0 0 1 12 5c5 0 9.4 4.1 10 7a10.6 10.6 0 0 1-3.2 5.2M6.4 6.4A11.6 11.6 0 0 0 2 12c.6 2.9 5 7 10 7 1.4 0 2.7-.3 3.9-.9"/>':'<path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'}</svg><span>${shown?'Ẩn lịch đã qua':'Hiện lịch đã qua'}</span>${count?`<span class="past-count">${count}</span>`:''}</button>`;
+}
+// Làm mới khi đồng hồ chuyển qua mốc 10 phút (không làm gián đoạn popup/form).
+let lastLiveBucket=localDay(new Date())+'-'+Math.floor((new Date().getHours()*60+new Date().getMinutes())/10);
+function refreshPastIfNeeded(){
+ const d=new Date(),bucket=localDay(d)+'-'+Math.floor((d.getHours()*60+d.getMinutes())/10);
+ if(bucket===lastLiveBucket)return;
+ if(!A.in||!['bk','list',''].includes(A.page||'')||UI.showPast||UI.walkin||UI.detail?.id||A.ct||document.visibilityState==='hidden')return;
+ if(document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'))return;
+ lastLiveBucket=bucket;
+ const previousY=window.scrollY;
+ render();
+ window.scrollTo(0,Math.min(previousY,Math.max(0,document.documentElement.scrollHeight-window.innerHeight)));
+}
+setInterval(refreshPastIfNeeded,15000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPastIfNeeded()});
+
+const taken=(b,r,t)=>bookings.some(x=>x.b===b&&x.r===r&&x.t===t&&x.st!=='cancel');
+function render(){if(NS.today()!==TODAY){sync();UI.detail=null}$('app').innerHTML=admin();const hp=$('hP'),hm=$('hM');if(hp&&hm){hp.style.display=A.in?'':'none';const inPw=A.in&&A.page==='pw';hm.classList.toggle('on',!inPw);hp.classList.toggle('on',inPw);hm.setAttribute('aria-pressed',String(!inPw));hp.setAttribute('aria-pressed',String(inPw))}renderBookingDetailModal()}
+// Trang Đặt lịch (tab khác) vừa thay đổi dữ liệu → cập nhật ngay, trừ khi nhân viên đang gõ.
+window.addEventListener('ngoi-store-error',e=>{let t=document.getElementById('store-toast');if(!t){t=document.createElement('div');t.id='store-toast';t.setAttribute('role','alert');t.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:400;max-width:min(92vw,560px);padding:12px 16px;border-radius:12px;background:#8f2a22;color:#fff;font:500 13.5px/1.5 \'Be Vietnam Pro\',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25)';document.body.appendChild(t)}t.textContent=e&&e.detail==='remote_write'?'Không gửi được thay đổi lên máy chủ (mất mạng hoặc bị từ chối). Kiểm tra kết nối rồi thử lại.':'Không lưu được thay đổi vì bộ nhớ trình duyệt đã đầy. Thao tác vừa rồi chưa được ghi lại.';clearTimeout(t._h);t._h=setTimeout(()=>t.remove(),8000)});
+NS.onChange(()=>{sync();if(!A.in||UI.walkin||['pw','cfg'].includes(A.page)||document.activeElement?.closest('input,textarea,select'))return;const y=window.scrollY;render();window.scrollTo(0,y)});
+function admin(){
+ if(!A.in)return `<div class="card" style="max-width:400px;margin:0 auto"><h2>Đăng nhập quản lý</h2><p class="sub">Dành cho nhân viên Ngói.</p><input class="f" value="admin@ngoi.vn" aria-label="Email"><input class="f" id="lp" type="password" value="${DB.password==='123456'?'123456':''}" aria-label="Mật khẩu" onkeydown="if(event.key==='Enter')doLogin()"><div class="err" id="lerr2"></div><button class="btn" style="width:100%" onclick="doLogin()">Đăng nhập</button></div>`;
+ if(A.page==='list')return adminNav()+bookingDirectoryPage();
+ if(A.page==='cfg')return adminNav()+roomSettingsPage();
+ if(A.page==='rv')return adminNav()+revPage();
+ if(A.page==='fb')return adminNav()+fbPage();
+ if(A.page==='pw')return pwPage();
+ const c=getCfg(A.br), allRooms=getRooms(A.br), L=bookings.filter(x=>x.b===A.br);
+ const cnt=k=>L.filter(x=>x.st===k).length;
+ const periods=periodsFor(A.br);
+ if(!periods.some(([v])=>v===UI.window))UI.window='all';
+ if(UI.room!=='all'&&!allRooms.some(r=>r.id===UI.room))UI.room='all';
+ const rooms=allRooms.filter(r=>UI.room==='all'||r.id===UI.room);
+ const rawTimes=timeRange(c.open,c.close);
+ const selectedEnd=UI.window==='all'?c.close:tstr(Math.min(minutes(UI.window)+120,minutes(c.close)));
+ const windowTimes=rawTimes.filter(t=>UI.window==='all'||(t>=UI.window&&t<selectedEnd));
+ const hiddenTimes=windowTimes.filter(t=>slotEnded(t)).length;
+ const visibleTimes=windowTimes.filter(t=>UI.showPast||!slotEnded(t));
+ const filtered=L.filter(x=>(UI.status==='all'||x.st===UI.status)&&(!UI.search||[x.name,x.phone||'',x.code||'',by(RM,x.r)?.n||'',x.t].some(v=>String(v).toLowerCase().includes(UI.search.toLowerCase())))).sort((a,b)=>a.t.localeCompare(b.t));
+ const activeSlots=allRooms.reduce((sum,r)=>sum+rawTimes.filter(t=>roomAvailable(r,t,A.br)).length,0);
+ const branches=BR.map((b,i)=>{const on=b.id===A.br,bc=getCfg(b.id);return `<button class="branch-chip ${on?'active':''}" aria-pressed="${on}" onclick="switchBranch('${b.id}')"><span>Chi nhánh ${i+1}</span><strong>${esc(b.n)}</strong><small>${getRooms(b.id).length} phòng · ${bc.open}–${bc.close}</small></button>`}).join('');
+ const scheduleHeader=rooms.map(r=>`<th><span class="room-head-name">${esc(r.n)}</span><small>${esc(r.t)} · ${r.open}–${r.close} · ${(r.price||0).toLocaleString('vi-VN')}đ</small></th>`).join('');
+ const scheduleRows=visibleTimes.map(t=>`<tr class="${slotEnded(t)?'schedule-past-row':''}"><td class="time-col">${t}</td>${rooms.map(r=>{
+   const valid=roomAvailable(r,t,A.br);
+   if(!valid)return `<td><span class="schedule-cell offhours" title="Ngoài giờ hoạt động của ${esc(r.n)}" aria-label="${r.n} ${t} ngoài giờ">—</span></td>`;
+   const x=L.find(y=>y.r===r.id&&y.t===t&&y.st!=='cancel');
+   if(!x&&slotEnded(t))return `<td><span class="schedule-cell offhours" title="Đã qua giờ · ${esc(r.n)} · ${t}" aria-label="${esc(r.n)} ${t} đã qua giờ">Đã qua</span></td>`;
+   const cl=x?x.st:'free';
+   return `<td><button class="schedule-cell ${cl} ${x&&UI.highlight===x.id?'focus-booking':''}" title="${x?esc(x.name)+' · '+ST[x.st][0]: 'Đặt lịch tại quầy · '+esc(r.n)+' · '+t}" onclick="${x?`showBooking(${x.id})`:`showEmpty('${r.id}','${t}')`}">${x?esc(x.name):'+'}</button></td>`;
+ }).join('')}</tr>`).join('');
+ let h=`<div class="admin-top"><div><h2>Quản lý lịch đặt</h2><p class="sub">${dlabel} · Mã truy cập cho khách hôm nay: <b style="color:var(--ink);letter-spacing:.06em">${NS.todayCode()}</b></p></div><div class="admin-tools"><button class="btn btn-lite btn-sm" onclick="UI.window='all';UI.room='all';UI.search='';UI.status='all';UI.detail=null;render()">Đặt lại bộ lọc</button><button class="btn btn-sm" onclick="A.page='cfg';render()">Quản lý phòng & giờ</button></div></div>
+ <div class="branch-switch" aria-label="Chọn chi nhánh">${branches}</div>
+ <div class="branch-summary"><span><b>${esc(by(BR,A.br).n)}</b> · ${c.open}–${c.close}</span><span>${allRooms.length} phòng hoạt động · ${activeSlots} khung 10 phút/ngày</span></div>
+ <div class="admin-controls admin-schedule-controls"><div><label>Khoảng giờ xem lịch</label><select aria-label="Khoảng giờ" onchange="UI.window=this.value;UI.detail=null;render()">${periods.map(([v,n])=>`<option value="${v}" ${UI.window===v?'selected':''}>${n}</option>`).join('')}</select></div><div><label>Lọc theo phòng</label><select aria-label="Lọc phòng" onchange="UI.room=this.value;UI.detail=null;render()"><option value="all">Tất cả ${allRooms.length} phòng</option>${allRooms.map(r=>`<option value="${r.id}" ${UI.room===r.id?'selected':''}>${esc(r.n)}</option>`).join('')}</select></div><div><label>Ngày quản lý</label><input class="f" type="date" value="${TODAY}" disabled title="Bản demo chỉ hỗ trợ ngày hôm nay"></div></div>
+ <div class="stats"><div class="card stat"><b>${cnt('booked')}</b><span>Chờ check-in</span></div><div class="card stat"><b>${cnt('shoot')}</b><span>Đang chụp</span></div><div class="card stat"><b>${cnt('done')}</b><span>Hoàn thành</span></div><div class="card stat"><b>${cnt('cancel')}</b><span>Đã hủy</span></div></div>
+ <div class="section-head"><h3>Lịch phòng theo giờ</h3><span class="notice">Bảng đã được làm dịu màu để dễ nhìn hơn · bấm vào ô có khách để xem chi tiết</span></div>
+ <div class="schedule-shell">
+   <div class="past-toggle-row"><div class="past-toggle-copy"><strong>${UI.showPast?'Đang xem cả lịch đã qua.':'Chỉ hiện khung giờ còn hiệu lực.'}</strong> ${hiddenTimes?`${hiddenTimes} mốc giờ đã kết thúc trong khoảng đang xem.`:'Chưa có khung giờ nào kết thúc trong khoảng này.'} Các lịch cũ vẫn được lưu.</div>${pastToggle(hiddenTimes)}</div>
+   <div class="schedule-toolbar">
+     <div class="schedule-hint"><strong>Gợi ý xem nhanh:</strong> nhấn dấu + để đặt lịch khách tại quầy · ô màu nhạt là đã có lịch · ô gạch là ngoài giờ phòng.</div>
+     <div class="legend schedule-legend"><span><i style="background:var(--free)"></i>Trống</span><span><i style="background:var(--booked)"></i>Đã đặt</span><span><i style="background:var(--shoot)"></i>Đang chụp</span><span><i style="background:var(--done)"></i>Hoàn thành</span><span><i style="background:var(--cancel)"></i>Đã hủy</span><span><i style="background:var(--bg);border:1px solid var(--line)"></i>Ngoài giờ</span></div>
+   </div>
+   ${rooms.length?`<div class="schedule-wrap"><table class="schedule" style="min-width:${Math.max(460,110+rooms.length*178)}px"><thead><tr><th>Giờ</th>${scheduleHeader}</tr></thead><tbody>${scheduleRows||`<tr><td colspan="${rooms.length+1}"><div class="schedule-empty-past">Không còn khung giờ trong khoảng đang xem. ${hiddenTimes?'Nhấn “Hiện lịch đã qua” để kiểm tra.':'Chọn khoảng giờ khác để xem lịch.'}</div></td></tr>`}</tbody></table></div>`:`<div class="card empty-state">Chi nhánh chưa có phòng hoạt động. Vào “Quản lý phòng & giờ” để bật hoặc thêm phòng.</div>`}
+   <div class="schedule-note-grid"><div class="schedule-note"><b>Đối chiếu booking</b>Nếu cần tìm theo mã booking, tên khách hoặc số điện thoại, hãy mở Danh sách booking.</div><div class="schedule-note"><b>Mẹo quản lý</b>Chọn khoảng 2 giờ hoặc lọc theo phòng để màn hình gọn và bớt rối mắt.</div></div>
+ </div>
+
+ <div class="schedule-directory-link"><div><strong>Cần tra cứu hoặc đối chiếu booking?</strong><p class="notice">Tìm theo mã, khách hàng, giờ và trạng thái, sau đó chuyển đến đúng ô lịch.</p></div><button class="btn btn-sm" onclick="A.page='list';UI.detail=null;render()">Mở danh sách booking</button></div>
+ <div style="margin-top:18px">${contactPanel()}</div>`;
+ return adminNav()+h;
+}
+
+function bookingDirectoryPage(){
+ const c=getCfg(A.br), L=bookings.filter(x=>x.b===A.br);
+ const matches=L.filter(x=>(UI.status==='all'||x.st===UI.status)&&(!UI.search||[x.name,x.phone||'',x.code||'',by(RM,x.r)?.n||'',x.t].some(v=>String(v).toLowerCase().includes(UI.search.toLowerCase()))));
+ const hiddenBookings=matches.filter(x=>slotEnded(x.t,x.date||TODAY)).length;
+ const shownBookings=matches.filter(x=>UI.showPast||!slotEnded(x.t,x.date||TODAY)).length;
+ const branches=BR.map((b,i)=>`<button class="branch-chip ${A.br===b.id?'active':''}" onclick="switchBranch('${b.id}')"><span>Chi nhánh ${i+1}</span><strong>${esc(b.n)}</strong><small>${getRooms(b.id).length} phòng · ${getCfg(b.id).open}–${getCfg(b.id).close}</small></button>`).join('');
+ return `<div class="admin-top"><div><h2>Danh sách booking</h2><p class="sub">Tra cứu, kiểm tra trạng thái và đối chiếu trực tiếp với lịch phòng theo giờ.</p></div><div class="admin-tools"><button class="btn btn-lite btn-sm" onclick="UI.search='';UI.status='all';A.q='';UI.detail=null;render()">Xóa bộ lọc</button><button class="btn btn-sm" onclick="A.page='bk';render()">Xem lịch phòng</button></div></div>
+ <div class="branch-switch">${branches}</div>
+ <div class="branch-summary"><span><b>${esc(by(BR,A.br)?.n||'')}</b> · ${c.open}–${c.close}</span><span id="booking-visible-count">${shownBookings} / ${L.length} booking đang hiển thị</span></div>
+ <div class="past-toggle-row"><div class="past-toggle-copy" id="booking-past-copy"><strong>${UI.showPast?'Đang hiển thị cả lịch đã qua.':'Mặc định ẩn các booking đã kết thúc.'}</strong> ${hiddenBookings} booking đã qua theo bộ lọc. Bạn vẫn có thể tra cứu mã bất kỳ ở bên dưới.</div><div id="booking-past-button">${pastToggle(hiddenBookings)}</div></div>
+ ${lookupCard()}
+ <div class="booking-filters"><input class="f" aria-label="Tìm booking" placeholder="Tìm tên khách, SĐT, mã booking, giờ..." value="${esc(UI.search)}" oninput="UI.search=this.value;refreshBookingList()"><select aria-label="Lọc trạng thái" onchange="UI.status=this.value;refreshBookingList()"><option value="all">Tất cả trạng thái</option>${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${UI.status===k?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+ <div class="booking-workspace"><div class="booking-main" id="booking-list">${bookingList()}</div></div>
+ <div style="margin-top:18px">${contactPanel()}</div>`;
+}
+function compareBooking(id){
+ const x=by(bookings,id);if(!x)return;
+ // Mở lại lịch đã qua khi người quản lý muốn đối chiếu một booking cũ.
+ if(slotEnded(x.t,x.date||TODAY))UI.showPast=true;
+ if(x.b!==A.br)A.br=x.b;
+ const c=getCfg(A.br), t=minutes(x.t), start=minutes(c.open);
+ UI.window=t>=start&&t<minutes(c.close)?tstr(start+Math.floor((t-start)/120)*120):'all';
+ UI.room=getRooms(A.br).some(r=>r.id===x.r)?x.r:'all';
+ UI.detail=null;UI.highlight=id;A.page='bk';render();
+ document.querySelector('.schedule-wrap')?.scrollIntoView({block:'start',behavior:'smooth'});
+}
+function minutePlus(t,n){const [h,m]=t.split(':').map(Number),v=h*60+m+n;return String(Math.floor(v/60)).padStart(2,'0')+':'+String(v%60).padStart(2,'0')}
+function roomSettingsPage(){
+ const b=A.br,c=getCfg(b),branches=BR.map((x,i)=>`<button class="branch-chip ${b===x.id?'active':''}" onclick="switchBranch('${x.id}');A.page='cfg';render()"><span>Chi nhánh ${i+1}</span><strong>${esc(x.n)}</strong><small>${getRooms(x.id).length} phòng đang bật</small></button>`).join('');
+ const rows=c.rooms.map((r,i)=>`<div class="room-config-card" data-room="${esc(r.id)}"><div class="room-config-top"><div><span class="small-kicker">PHÒNG ${i+1}</span><b>${esc(r.n)}</b></div><label class="room-toggle"><input id="enabled-${r.id}" type="checkbox" ${r.active?'checked':''}><span>Đang hoạt động</span></label></div><div class="room-fields"><div><label for="name-${r.id}">Tên hiển thị</label><input class="f" id="name-${r.id}" value="${esc(r.n)}" maxlength="44"></div><div><label for="style-${r.id}">Loại / phong cách</label><input class="f" id="style-${r.id}" value="${esc(r.t)}" maxlength="40"></div><div><label for="price-${r.id}">Giá / slot (đ)</label><input class="f" id="price-${r.id}" type="number" min="0" step="1000" inputmode="numeric" value="${r.price??0}"></div><div><label for="open-${r.id}">Mở từ</label><input class="f" id="open-${r.id}" type="time" step="600" value="${r.open}"></div><div><label for="close-${r.id}">Đến</label><input class="f" id="close-${r.id}" type="time" step="600" value="${r.close}"></div></div><div class="room-config-foot"><span class="notice">Mã phòng: ${esc(r.p)}</span><button class="text-action danger" type="button" onclick="removeRoom('${r.id}')">Xóa phòng</button></div></div>`).join('');
+ return `<div class="admin-top"><div><h2>Phòng & giờ hoạt động</h2><p class="sub">Thiết lập riêng cho từng chi nhánh. Lịch phòng cập nhật sau khi lưu.</p></div><button class="btn btn-lite btn-sm" onclick="A.page='bk';UI.window='all';UI.room='all';render()">Về lịch đặt</button></div><div class="branch-switch">${branches}</div>
+ <div class="card settings-summary"><div class="settings-summary-head"><div><h3>${esc(by(BR,b).n)}</h3><p class="notice">Giờ hoạt động chung của chi nhánh</p></div><span class="settings-demo">Áp dụng ngay cho trang đặt lịch của khách</span></div><div class="hours-fields"><div><label for="branch-open">Giờ mở cửa</label><input class="f" type="time" step="600" id="branch-open" value="${c.open}"></div><div><label for="branch-close">Giờ đóng cửa</label><input class="f" type="time" step="600" id="branch-close" value="${c.close}"></div></div><p class="notice">Mỗi phòng có thể hoạt động trong một khoảng ngắn hơn. Khung ngoài giờ sẽ được đánh dấu trong lịch.</p></div>
+ <div class="section-head"><h3>Danh sách phòng (${c.rooms.length})</h3><button class="btn btn-lite btn-sm" onclick="addRoom()">+ Thêm phòng</button></div><div class="room-config-list">${rows}</div>
+ <div class="settings-footer"><div id="settings-msg" class="notice" role="status">Sau khi lưu, trang đặt lịch của khách dùng ngay tên phòng, giá và giờ mới.</div><div class="settings-actions"><button class="btn btn-lite btn-sm" onclick="resetBranchExample()">Khôi phục mẫu</button><button class="btn btn-sm" onclick="saveRoomSettings()">Lưu cấu hình</button></div></div>`;
+}
+function saveRoomSettings(silent=false){
+ const c=getCfg(A.br),start=$('branch-open')?.value,end=$('branch-close')?.value;
+ const error=m=>{const el=$('settings-msg');if(el){el.textContent=m;el.style.color='#a0322c'}return false};
+ const proper=t=>/^\d\d:\d\d$/.test(t)&&minutes(t)%10===0;
+ if(!proper(start)||!proper(end)||minutes(end)<=minutes(start))return error('Giờ chi nhánh phải đúng mốc 10 phút và giờ đóng phải sau giờ mở.');
+ const updated=[];
+ for(const r of c.rooms){
+  const price=Number($('price-'+r.id)?.value),n=$('name-'+r.id)?.value.trim(),t=$('style-'+r.id)?.value.trim(),o=$('open-'+r.id)?.value,e=$('close-'+r.id)?.value,active=$('enabled-'+r.id)?.checked;
+  if(!n||!t)return error('Mỗi phòng cần có tên và phong cách/loại phòng.');
+  if(!Number.isFinite(price)||price<0||price%1000)return error('Giá của “'+n+'” phải là số tiền chẵn nghìn (ví dụ 50000).');
+  if(!proper(o)||!proper(e)||minutes(o)<minutes(start)||minutes(e)>minutes(end)||minutes(e)<=minutes(o))return error('Giờ hoạt động của “'+n+'” phải theo mốc 10 phút và nằm trong giờ chi nhánh.');
+  const conflict=bookings.some(x=>x.b===A.br&&x.r===r.id&&['booked','shoot'].includes(x.st)&&(!active||minutes(x.t)<minutes(o)||minutes(x.t)+10>minutes(e)));
+  if(conflict)return error('“'+n+'” đang có booking chưa hoàn tất ngoài giờ mới. Vui lòng xử lý các lịch đó trước khi đổi giờ hoặc tắt phòng.');
+  updated.push({...r,n,t,price,open:o,close:e,active:!!active});
+ }
+ if(!updated.some(r=>r.active))return error('Cần giữ ít nhất một phòng hoạt động tại chi nhánh.');
+ NS.update(db=>{db.config[A.br]={open:start,close:end,rooms:updated}});sync();UI.window='all';UI.room='all';UI.detail=null;
+ if(!silent){A.page='bk';render()}return true;
+}
+function addRoom(){
+ if(!saveRoomSettings(true))return;
+ const c=getCfg(A.br),id='room'+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36);
+ const r={id,n:'Phòng mới '+(c.rooms.length+1),t:'Chưa đặt tên',p:'P'+(c.rooms.length+1),price:50000,open:c.open,close:c.close,active:true};
+ NS.update(db=>{db.config[A.br].rooms.push(r)});sync();render();
+ document.getElementById('name-'+id)?.focus();
+}
+function removeRoom(id){
+ const c=getCfg(A.br),r=c.rooms.find(x=>x.id===id);
+ if(!r)return;
+ if(DB.bookings.some(x=>x.r===id)){
+  const m=$('settings-msg');if(m){m.textContent='Phòng đã có lịch sử booking. Hãy tắt “Đang hoạt động” thay vì xóa.';m.style.color='#a0322c'}return;
+ }
+ askConfirm('Xóa “'+r.n+'” khỏi chi nhánh này? Thao tác không hoàn tác được.','Xóa phòng này',()=>{
+ NS.update(db=>{const c=db.config[A.br];c.rooms=c.rooms.filter(x=>x.id!==id);if(!c.rooms.some(x=>x.active)&&c.rooms[0])c.rooms[0].active=true});sync();render()});
+}
+function resetBranchExample(){
+ askConfirm('Khôi phục tên phòng, giá và giờ mở cửa mẫu cho chi nhánh đang xem?','Khôi phục',()=>{
+ NS.update(db=>{db.config[A.br]=NS.clone(NS.DEFAULT_CONFIG[A.br])});sync();UI.window='all';UI.room='all';render()});
+}
+function showBooking(id){
+ const x=by(bookings,id);if(!x)return;
+ UI.detail={id};UI.photoEdit=null;UI.photoError='';renderBookingDetailModal();
+ document.querySelectorAll('.booking-list tr').forEach(tr=>tr.classList.toggle('selected',Boolean(tr.querySelector(`[data-booking-id="${id}"]`))));
+ document.querySelectorAll('.booking-list [data-booking-id]').forEach(btn=>{const selected=btn.dataset.bookingId===String(id);btn.textContent=selected?'Đang xem':'Chi tiết';btn.classList.toggle('primary',selected)});
+ const dlg=document.querySelector('.booking-detail-dialog');if(dlg)dlg.focus({preventScroll:true});
+}
+function closeBookingDetail(){
+ UI.detail=null;UI.photoEdit=null;UI.photoError='';
+ const host=$('booking-detail-host');if(host)host.innerHTML='';
+ document.body.classList.remove('booking-detail-open');
+ document.querySelectorAll('.booking-list tr.selected').forEach(e=>e.classList.remove('selected'));
+ document.querySelectorAll('.booking-list [data-booking-id]').forEach(btn=>{btn.textContent='Chi tiết';btn.classList.remove('primary')});
+}
+function renderBookingDetailModal(){
+ const host=$('booking-detail-host');if(!host)return;
+ const page=A.page||'bk';
+ if(!A.in||!['bk','list'].includes(page)||!UI.detail?.id){
+   host.innerHTML='';document.body.classList.remove('booking-detail-open');return;
+ }
+ const booking=by(bookings,UI.detail.id);
+ if(!booking){closeBookingDetail();return}
+ host.innerHTML=`<div class="booking-detail-overlay" onclick="if(event.target===this)closeBookingDetail()"><section class="booking-detail-dialog" role="dialog" aria-modal="true" aria-label="Chi tiết booking ${esc(booking.code||'')}" tabindex="-1">${detailPanel()}</section></div>`;
+ document.body.classList.add('booking-detail-open');
+}
+
+function showEmpty(r,t){openWalkin(r,t)}
+function openWalkin(r,t){
+ const room=getRooms(A.br).find(x=>x.id===r);
+ if(!A.in||!room||!roomAvailable(room,t,A.br)||slotEnded(t))return;
+ const existed=bookings.find(x=>x.b===A.br&&x.r===r&&x.t===t&&x.st!=='cancel');
+ if(existed){showBooking(existed.id);return}
+ UI.walkin={b:A.br,r,t};
+ const br=by(BR,A.br),host=$('walkin-host');
+ host.innerHTML=`<div class="walkin-overlay" onclick="if(event.target===this)closeWalkin()"><div class="walkin-dialog" role="dialog" aria-modal="true" aria-labelledby="walkin-title">
+ <div class="walkin-top"><div><span class="walkin-kicker">Booking tại quầy</span><h3 id="walkin-title">Thêm khách đến trực tiếp</h3></div><button type="button" class="walkin-close" aria-label="Đóng" onclick="closeWalkin()">×</button></div>
+ <div class="walkin-summary"><div><small>Chi nhánh</small><strong>${esc(br.n)}</strong></div><div><small>Phòng</small><strong>${esc(room.n)}</strong></div><div><small>Ngày</small><strong>${dlabel}</strong></div><div><small>Khung giờ (10 phút)</small><strong>${t} – ${minutePlus(t,10)}</strong></div></div>
+ <form id="walkin-form" onsubmit="event.preventDefault();saveWalkin()" novalidate>
+ <div class="walkin-field"><label for="walkin-name">Tên khách hàng <span style="color:#B24637">*</span></label><input id="walkin-name" type="text" maxlength="80" autocomplete="name" placeholder="Nhập tên khách" required></div>
+ <div class="walkin-field"><label for="walkin-phone">Số điện thoại <span style="color:#B24637">*</span></label><input id="walkin-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="Ví dụ: 0912345678" required></div>
+ <div class="walkin-field"><label for="walkin-status">Trạng thái ban đầu</label><select id="walkin-status"><option value="booked">Đã đặt – Chờ check-in</option><option value="shoot">Đang chụp – Check-in ngay</option></select></div>
+ <div class="walkin-field"><label for="walkin-note">Ghi chú (không bắt buộc)</label><textarea id="walkin-note" maxlength="250" rows="2" placeholder="Ví dụ: khách đi nhóm, cần hỗ trợ phông..."></textarea></div>
+ <p id="walkin-error" class="walkin-err" role="alert"></p>
+ <div class="walkin-actions"><button class="btn btn-lite" type="button" onclick="closeWalkin()">Hủy</button><button class="btn" type="submit">Xác nhận đặt lịch</button></div></form></div></div>`;
+ document.body.classList.add('walkin-open');$('walkin-name')?.focus();
+}
+function closeWalkin(){UI.walkin=null;const h=$('walkin-host');if(h)h.innerHTML='';document.body.classList.remove('walkin-open')}
+function saveWalkin(){
+ const d=UI.walkin,err=$('walkin-error');if(!d||!err)return;
+ const name=$('walkin-name').value.trim().replace(/\s+/g,' '),phone=$('walkin-phone').value.trim(),note=$('walkin-note').value.trim(),st=$('walkin-status').value;
+ const digits=phone.replace(/\D/g,'');
+ const fail=m=>{err.textContent=m;return false};
+ if(name.length<2)return fail('Vui lòng nhập tên khách hàng (ít nhất 2 ký tự).');
+ if(!/^(?:0\d{9}|84\d{9})$/.test(digits))return fail('Nhập số điện thoại Việt Nam hợp lệ (10 số bắt đầu bằng 0 hoặc 84 + 9 số).');
+ if(!['booked','shoot'].includes(st))return fail('Trạng thái không hợp lệ.');
+ const room=getRooms(d.b).find(x=>x.id===d.r);
+ if(!room||!roomAvailable(room,d.t,d.b))return fail('Phòng hoặc khung giờ này đã ngừng hoạt động. Vui lòng chọn lại.');
+ if(slotEnded(d.t))return fail('Khung giờ này đã kết thúc. Vui lòng đóng form và chọn giờ khác.');
+ if(taken(d.b,d.r,d.t))return fail('Khung giờ này vừa có lịch. Vui lòng đóng form và chọn giờ khác.');
+ const btn=document.querySelector('#walkin-form button[type=submit]');if(btn){btn.disabled=true;btn.textContent='Đang giữ chỗ…'}
+ return NS.reserve([{b:d.b,r:d.r,t:d.t,name,phone,st,note,source:'walkin'}],{numeric:true}).then(res=>{
+  sync();if(btn){btn.disabled=false;btn.textContent='Xác nhận đặt lịch'}
+  if(!res.ok){
+   if(res.reason==='full')return fail('Không lưu được vì bộ nhớ trình duyệt đã đầy. Hãy xuất dữ liệu cần giữ rồi dùng “Đặt lại dữ liệu dùng thử” ở trang giới thiệu.');
+   if(res.reason==='network')return fail('Chưa lưu được vì không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.');
+   return fail('Khung giờ này vừa có khách đặt online. Vui lòng đóng form và chọn giờ khác.');
+  }
+  closeWalkin();A.page='bk';UI.detail=null;render();showBooking(res.ids[0]);
+ });
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('confirm-host')?.innerHTML){closeConfirm();return}if(UI.walkin)closeWalkin();else if(UI.detail?.id)closeBookingDetail()}});
+function photoSection(x){
+ if(x.st!=='done')return '';
+ const link=x.link&&validPhotoUrl(x.link)?x.link:'';
+ const editing=UI.photoEdit===x.id;
+ return `<div class="detail-section-title">Ảnh sau khi chụp</div><div class="booking-photo-panel">
+  <div class="booking-photo-head"><strong>${link?'Đã có đường dẫn ảnh':'Chưa có ảnh được liên kết'}</strong><span class="pill ${link?'s-done':'s-booked'}">${link?'Có link ảnh':'Chờ cập nhật'}</span></div>
+  ${editing?`<label for="booking-photo-url" style="font-size:12.5px;font-weight:600">Link ảnh hoặc album ảnh</label><input id="booking-photo-url" type="url" class="booking-photo-input" placeholder="https://..." value="${esc(link)}" autocomplete="off" spellcheck="false"><p class="booking-photo-desc">Dán đường dẫn ảnh thật từ Google Drive, album ảnh hoặc nơi lưu ảnh của Ngói. Chỉ người có quyền xem link mới mở được ảnh.</p><p id="booking-photo-error" class="booking-photo-error" role="alert">${esc(UI.photoError||'')}</p><div class="booking-photo-actions"><button class="btn" onclick="saveBookingPhoto(${x.id})">Lưu link ảnh</button><button class="btn btn-lite" onclick="cancelBookingPhotoEdit()">Hủy</button>${link?`<button class="btn btn-lite danger" onclick="removeBookingPhoto(${x.id})">Xóa link</button>`:''}</div>`:
+  link?`<div class="booking-photo-link" title="${esc(link)}">${esc(link)}</div><div class="booking-photo-actions"><a class="btn" href="${esc(link)}" target="_blank" rel="noopener noreferrer" aria-label="Xem ảnh của ${esc(x.name)}">Xem ảnh</a><button class="btn btn-lite" onclick="editBookingPhoto(${x.id})">Đổi link ảnh</button></div>`:
+  `<p class="booking-photo-desc">Khách đã hoàn thành lượt chụp. Nhân viên có thể dán link album để xem lại hoặc gửi cho khách. Chưa kết nối máy photobooth để tự lấy ảnh.</p><div class="booking-photo-actions"><button class="btn" onclick="editBookingPhoto(${x.id})">Thêm link ảnh</button></div>`}
+ </div>`;
+}
+function editBookingPhotoIfMissing(id){const x=by(bookings,id);if(x?.st==='done'&&!(x.link&&validPhotoUrl(x.link)))editBookingPhoto(id)}
+function editBookingPhoto(id){UI.photoEdit=id;UI.photoError='';renderBookingDetailModal();document.getElementById('booking-photo-url')?.focus({preventScroll:true})}
+function cancelBookingPhotoEdit(){UI.photoEdit=null;UI.photoError='';renderBookingDetailModal()}
+function saveBookingPhoto(id){
+ const x=by(bookings,id),input=document.getElementById('booking-photo-url');if(!x||!input||x.st!=='done')return;
+ const v=input.value.trim();if(!validPhotoUrl(v)){UI.photoError='Nhập một link ảnh hợp lệ bắt đầu bằng https:// hoặc http:// (không phải link mẫu).';const e=document.getElementById('booking-photo-error');if(e)e.textContent=UI.photoError;input.focus();return}
+ x.link=v;x.auto=0;persistPhotoLink(x);UI.photoEdit=null;UI.photoError='';render();
+}
+function removeBookingPhoto(id){const x=by(bookings,id);if(!x)return;askConfirm('Xóa link ảnh đã lưu cho booking này?','Xóa link ảnh',()=>{delete x.link;persistPhotoLink(x);UI.photoEdit=null;UI.photoError='';render()})}
+function detailPanel(){
+ if(!UI.detail)return '';
+ const d=UI.detail,x=d.id?by(bookings,d.id):null;
+ if(!x)return `<div class="card booking-detail-card"><div class="detail-heading"><div><h3>Khung giờ trống</h3><p>Thông tin khung giờ đã chọn</p></div><button class="btn btn-lite btn-sm" onclick="closeBookingDetail()" aria-label="Đóng chi tiết">Đóng</button></div><div class="detail-summary"><strong>${esc(by(RM,d.r)?.n||'')} · ${d.t}–${minutePlus(d.t,10)}</strong><span class="notice">Chưa có booking tại khung giờ này.</span></div><p class="notice">Chức năng tạo booking tại quầy cần kết nối cơ sở dữ liệu chung trước khi sử dụng thực tế.</p></div>`;
+ const room=by(RM,x.r),branch=by(BR,x.b),st=ST[x.st];
+ return `<div class="card booking-detail-card"><div class="detail-heading"><div><h3>Chi tiết booking</h3><p>Đối chiếu thông tin trước khi thao tác</p></div><button class="btn btn-lite btn-sm" onclick="closeBookingDetail()" aria-label="Đóng chi tiết">Đóng</button></div>
+ <div class="detail-summary"><strong>${esc(x.name)}</strong><span class="booking-code">${esc(x.code||'Chưa có mã booking')}</span>${x.source==='walkin'?'<span class="walkin-badge">Khách tại quầy</span>':x.source==='online'?'<span class="walkin-badge">Đặt online</span>':x.source==='sample'?'<span class="walkin-badge" style="opacity:.7">Lịch mẫu</span>':''}<div><span class="pill ${st[1]}">${st[0]}</span></div></div>
+ <div class="detail-section-title">Thông tin lịch chụp</div>
+ <div class="detail-grid"><div><small>Ngày chụp</small><b>${dlabel}</b></div><div><small>Khung giờ</small><b>${x.t}–${minutePlus(x.t,10)}</b></div><div><small>Chi nhánh</small><b>${esc(branch?.n||'')}</b></div><div><small>Phòng</small><b>${esc(room?.n||'')} · ${esc(room?.t||'')}</b></div></div>
+ <div class="detail-section-title">Thông tin khách hàng</div><div class="detail-grid"><div><small>Họ tên</small><b>${esc(x.name)}</b></div><div><small>Số điện thoại</small><b>${esc(x.phone||'Chưa có số')}</b></div></div>
+ ${x.note?`<div class="detail-section-title">Ghi chú</div><p style="margin:6px 0 10px;font-size:13px;overflow-wrap:anywhere">${esc(x.note)}</p>`:''}${photoSection(x)}<div class="detail-actions">${A.page==='list'?`<button class="btn btn-lite btn-sm" onclick="compareBooking(${x.id})">Xem trên lịch phòng</button>`:''}${x.st==='booked'?`<button class="btn btn-sm" onclick="setS(${x.id},'shoot')">Check-in</button><button class="btn btn-lite btn-sm danger" onclick="confirmCancel(${x.id})">Hủy lịch</button>`:x.st==='shoot'?`<button class="btn btn-sm" onclick="setS(${x.id},'done')">Hoàn thành</button>`:''}<button class="btn btn-lite btn-sm" onclick="closeBookingDetail();openCt(${x.id})">Liên hệ khách</button></div></div>`;
+}
+function confirmCancel(id){const x=by(bookings,id);if(x)askConfirm('Hủy lịch '+(x.code||'')+' của '+x.name+' lúc '+x.t+'? Khung giờ sẽ được mở lại cho khách khác.','Xác nhận hủy',()=>setS(id,'cancel'))}
+// Hộp xác nhận vẽ trong trang (confirm() của trình duyệt bị chặn khi trang chạy trong khung nhúng).
+function askConfirm(msg,yes,onYes){const h=$('confirm-host');if(!h)return;h.innerHTML=`<div class="walkin-overlay" style="z-index:300" onclick="if(event.target===this)closeConfirm()"><div class="walkin-dialog" role="alertdialog" aria-modal="true" aria-labelledby="cf-msg" style="max-width:430px"><p id="cf-msg" style="margin:0 0 6px;font-size:15px;line-height:1.55">${esc(msg)}</p><div class="walkin-actions"><button class="btn btn-lite" type="button" onclick="closeConfirm()">Quay lại</button><button class="btn" type="button" id="cf-yes">${esc(yes)}</button></div></div></div>`;const y=$('cf-yes');y.onclick=()=>{closeConfirm();onYes()};y.focus()}
+function closeConfirm(){const h=$('confirm-host');if(h)h.innerHTML=''}
+function bookingList(){
+ const L=bookings.filter(x=>x.b===A.br&&(UI.status==='all'||x.st===UI.status)&&(UI.showPast||!slotEnded(x.t,x.date||TODAY))&&(!UI.search||[x.name,x.phone||'',x.code||'',by(RM,x.r)?.n||'',x.t].some(v=>String(v).toLowerCase().includes(UI.search.toLowerCase())))).sort((a,b)=>a.t.localeCompare(b.t));
+ return `<div class="card booking-list scroll"><table><thead><tr><th>Giờ</th><th>Khách hàng / Mã booking</th><th>Phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${L.map(x=>`<tr class="${UI.detail?.id===x.id?'selected':''} ${slotEnded(x.t,x.date||TODAY)?'booking-past-row':''} booking-selectable" tabindex="0" aria-label="Xem chi tiết booking của ${esc(x.name)} lúc ${x.t}" onclick="if(!event.target.closest('button'))showBooking(${x.id})" onkeydown="if((event.key==='Enter'||event.key===' ')&&event.target===this){event.preventDefault();showBooking(${x.id})}"><td class="booking-time">${x.t}</td><td><div class="customer-name">${esc(x.name)}</div><div class="booking-code">${esc(x.code||'Chưa có mã')}${x.source==='walkin'?'<span class="walkin-badge">Tại quầy</span>':x.source==='online'?'<span class="walkin-badge">Online</span>':x.source==='sample'?'<span class="walkin-badge" style="opacity:.7">Mẫu</span>':''}</div></td><td>${esc(by(RM,x.r)?.n||'')}</td><td><span class="pill ${ST[x.st][1]}">${ST[x.st][0]}</span></td><td><div class="row-actions"><button class="action-btn ${UI.detail?.id===x.id?'primary':''}" data-booking-id="${x.id}" onclick="showBooking(${x.id})">${UI.detail?.id===x.id?'Đang xem':'Chi tiết'}</button><button class="action-btn compare-action" onclick="compareBooking(${x.id})">Xem trên lịch</button>${x.st==='done'?`<button class="action-btn" onclick="showBooking(${x.id});editBookingPhotoIfMissing(${x.id})">${x.link&&validPhotoUrl(x.link)?'Ảnh chụp':'Thêm ảnh'}</button>`:''}</div></td></tr>`).join('')}</tbody></table>${L.length?'':`<div class="empty-state">${!UI.showPast?'Không có booking sắp tới theo bộ lọc. Nhấn “Hiện lịch đã qua” để kiểm tra lịch cũ.':'Không có booking phù hợp với bộ lọc.'}</div>`}</div>`;
+}
+function refreshBookingList(){
+ const e=document.getElementById('booking-list');if(e)e.innerHTML=bookingList();
+ const L=bookings.filter(x=>x.b===A.br);
+ const matches=L.filter(x=>(UI.status==='all'||x.st===UI.status)&&(!UI.search||[x.name,x.phone||'',x.code||'',by(RM,x.r)?.n||'',x.t].some(v=>String(v).toLowerCase().includes(UI.search.toLowerCase()))));
+ const hidden=matches.filter(x=>slotEnded(x.t,x.date||TODAY)).length;
+ const counter=$('booking-visible-count');if(counter)counter.textContent=(UI.showPast?matches.length:matches.length-hidden)+' / '+L.length+' booking đang hiển thị';
+ const copy=$('booking-past-copy');if(copy)copy.innerHTML='<strong>'+(UI.showPast?'Đang hiển thị cả lịch đã qua.':'Mặc định ẩn các booking đã kết thúc.')+'</strong> '+hidden+' booking đã qua theo bộ lọc. Bạn vẫn có thể tra cứu mã bất kỳ ở bên dưới.';
+ const btn=$('booking-past-button');if(btn)btn.innerHTML=pastToggle(hidden);
+}
+function lookupCard(){const q=(A.q||'').trim().toUpperCase(),res=q?bookings.filter(x=>x.code&&x.code.toUpperCase()===q):[];
+return `<div class="card" style="margin-bottom:14px"><b>Kiểm tra mã booking</b><div style="display:flex;gap:8px;margin-top:8px"><input class="f" id="qc" aria-label="Mã booking" placeholder="Nhập mã, ví dụ NGOI-148271" value="${esc(A.q||'')}" style="margin:0" onkeydown="if(event.key==='Enter')findCode()"><button class="btn" onclick="findCode()">Kiểm tra</button></div>`+(q?(res.length?'<div class="scroll" style="margin-top:10px"><table>'+res.map(x=>{const s=ST[x.st],id=x.id,act=x.st==='booked'?`<button onclick="setS(${id},'shoot')">Check-in</button><button onclick="confirmCancel(${id})">Hủy</button>`:x.st==='shoot'?`<button onclick="setS(${id},'done')">Hoàn thành</button>`:'';return `<tr><td>${x.t}</td><td>${esc(by(RM,x.r)?.n||'')}</td><td>${esc(by(BR,x.b)?.n||'')}</td><td>${esc(x.name)}</td><td><span class="pill ${s[1]}">${s[0]}</span></td><td>${act}${photoCell(x)}<button onclick="openCt(${id})">Liên hệ</button></td></tr>`}).join('')+'</table></div>':'<p class="err" style="text-align:left;margin:10px 0 0">Không tìm thấy mã này.</p>'):'')+'</div>'}
+function fbCard(){const L=[...FB].sort((p,q)=>String(q.createdAt).localeCompare(String(p.createdAt))).filter(x=>!x.b||x.b===A.br),nw=L.filter(x=>!x.r).length;
+return `<h3 style="margin:6px 0 10px;font-size:18px">Danh sách tin ${nw?`<span class="pill s-booked" style="margin-left:8px;font-family:'Be Vietnam Pro',sans-serif">${nw} mới</span>`:''}</h3>`+(L.length?L.map(x=>`<div class="card" style="margin-bottom:10px;padding:14px 16px;${x.r?'opacity:.75':''}"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${esc(x.n)}</b><span style="color:var(--muted);font-size:13px">${esc(NS.fmtTime(x.createdAt))}</span></div><div style="font-size:12.5px;color:var(--muted);margin:2px 0 6px">${esc(x.k)} · ${x.b?esc(by(BR,x.b).n):'Chung'}</div><div>${esc(x.m)}</div>${x.c?`<div style="font-size:12.5px;margin-top:6px">Liên hệ lại: <b>${esc(x.c)}</b>${/^[+\d][\d\s.]{8,}$/.test(x.c)?` · <a href="tel:${esc(x.c.replace(/[^+\d]/g,''))}" style="color:var(--brand)">Gọi</a>`:/@/.test(x.c)?` · <a href="mailto:${esc(x.c)}" style="color:var(--brand)">Email</a>`:''}</div>`:''}<div style="margin-top:8px"><button onclick="togFB(${x.id})" style="border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer">${x.r?'Đánh dấu chưa xem':'Đánh dấu đã xem'}</button></div></div>`).join(''):'<div class="card">Chưa có góp ý nào.</div>')}
+const REV={b1:[18.5,16.2,21,23.4,25.1,27.8,30.2,29.5,26.9,28.4],b2:[12.1,10.8,14.5,15.2,17.9,19.3,21.6,20.4,18.7,19.8]};
+const fm=n=>n.toFixed(1).replace('.',',')+' tr',sm=a=>a.reduce((x,y)=>x+y,0);
+function revPage(){
+ const s=A.rv||'all',ser=REV.b1.map((_,i)=>s==='b1'?REV.b1[i]:s==='b2'?REV.b2[i]:REV.b1[i]+REV.b2[i]),n=ser.length,tot=sm(ser),cur=ser[n-1],pct=(cur-ser[n-2])/ser[n-2]*100,mx=Math.max(...ser);
+ const chip=(v,l)=>{const on=s===v;return `<button onclick="A.rv='${v}';render()" aria-pressed="${on}" style="padding:8px 14px;border-radius:999px;border:1.5px solid ${on?'var(--brand)':'var(--line)'};background:${on?'var(--brand)':'var(--surface)'};color:${on?'var(--brand-ink)':'var(--ink)'};font:500 13.5px inherit;cursor:pointer">${l}</button>`};
+ const st=(b,l)=>`<div class="card stat"><b style="font-size:24px">${b}</b><span>${l}</span></div>`;
+ const bars=ser.map((v,i)=>{const seg=s==='all'?`<div style="height:${REV.b2[i]/v*100}%;background:var(--shoot)"></div><div style="height:${REV.b1[i]/v*100}%;background:var(--brand)"></div>`:'<div style="height:100%;background:var(--brand)"></div>';return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0"><span style="font-size:11px;color:var(--muted)">${v.toFixed(0)}</span><div title="Tháng ${i+1}: ${fm(v)}" style="width:100%;max-width:34px;height:${v/mx*160}px;display:flex;flex-direction:column;border-radius:6px 6px 0 0;overflow:hidden">${seg}</div><span style="font-size:12px">T${i+1}</span></div>`}).join('');
+ const rows=REV.b1.map((_,i)=>`<tr><td>Tháng ${i+1}</td><td>${fm(REV.b1[i])}</td><td>${fm(REV.b2[i])}</td><td><b>${fm(REV.b1[i]+REV.b2[i])}</b></td></tr>`).join('')+`<tr><td><b>Cộng</b></td><td><b>${fm(sm(REV.b1))}</b></td><td><b>${fm(sm(REV.b2))}</b></td><td><b>${fm(sm(REV.b1)+sm(REV.b2))}</b></td></tr>`;
+ const todayL=DB.bookings.filter(x=>x.date===TODAY&&x.st!=='cancel'&&(s==='all'||x.b===s)),price=x=>RM.find(r=>r.id===x.r)?.price||0,todayDone=todayL.filter(x=>x.st==='done').reduce((a,x)=>a+price(x),0),todayAll=todayL.reduce((a,x)=>a+price(x),0);
+ return `<h2>Doanh thu</h2><p class="sub">Hôm nay tính từ booking thật; biểu đồ theo tháng là số liệu mẫu (triệu đồng).</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">${chip('all','Tất cả chi nhánh')}${chip('b1',BR[0].n)}${chip('b2',BR[1].n)}</div><div class="stats">${st(todayDone.toLocaleString('vi-VN')+'đ','Hôm nay đã thu ('+todayL.filter(x=>x.st==='done').length+' lượt hoàn thành)')}${st(todayAll.toLocaleString('vi-VN')+'đ','Hôm nay dự kiến ('+todayL.length+' lượt chưa hủy)')}</div><div class="stats">${st(fm(tot),'Tổng doanh thu T1–T'+n)}${st(fm(cur),'Tháng '+n+' ('+(pct>=0?'+':'')+pct.toFixed(1).replace('.',',')+'% so với tháng trước)')}${st(fm(tot/n),'Trung bình mỗi tháng')}${st('T'+(ser.indexOf(mx)+1)+' · '+fm(mx),'Tháng cao nhất')}</div><div class="card"><b>Doanh thu theo tháng</b>${s==='all'?`<div class="legend"><span><i style="background:var(--brand)"></i>${BR[0].n}</span><span><i style="background:var(--shoot)"></i>${BR[1].n}</span></div>`:''}<div style="display:flex;align-items:flex-end;gap:6px;height:210px;margin-top:10px">${bars}</div></div><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 10px"><h3 style="margin:0;font-size:20px">Chi tiết theo tháng</h3><button class="btn ghost" onclick="exportXlsx()" style="padding:8px 16px;font-size:13.5px">Xuất Excel</button></div><p id="xmsg" class="err" style="text-align:left;min-height:0;margin:0 0 6px"></p><div class="card scroll"><table><tr><th>Tháng</th><th>${BR[0].n}</th><th>${BR[1].n}</th><th>Tổng</th></tr>${rows}</table></div>`}
+async function exportXlsx(){
+ const msg=$('xmsg'),say=(t,ok)=>{if(msg){msg.textContent=t;msg.style.color=ok?'var(--muted)':''}};
+ const rev=[['Tháng',BR[0].n,BR[1].n,'Tổng (triệu đồng)']].concat(REV.b1.map((_,i)=>['Tháng '+(i+1),REV.b1[i],REV.b2[i],+(REV.b1[i]+REV.b2[i]).toFixed(1)])).concat([['Cộng',+sm(REV.b1).toFixed(1),+sm(REV.b2).toFixed(1),+(sm(REV.b1)+sm(REV.b2)).toFixed(1)]]);
+ sync();const fmtD=d=>d.split('-').reverse().join('/');
+ const bk=[['Ngày','Giờ','Mã booking','Chi nhánh','Phòng','Khách','SĐT','Nguồn','Trạng thái','Giá (đ)','Ảnh in thêm']].concat([...DB.bookings].sort((p,q)=>(p.date+p.t).localeCompare(q.date+q.t)).map(x=>{const r=RM.find(y=>y.id===x.r);return [fmtD(x.date),x.t,x.code||'',by(BR,x.b)?.n||'',r?.n||'',x.name,x.phone||'',{online:'Online',walkin:'Tại quầy',sample:'Mẫu'}[x.source]||'',(ST[x.st]||ST.booked)[0],x.st==='cancel'?0:(r?.price||0),x.prints||0]}));
+ const deliver=async(name,bytes,type)=>{const dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;if(dl){try{await dl.save({filename:name,data:bytes});return true}catch(e){if(e&&e.code==='declined'){say('');return false}throw e}}saveBlob(new Blob([bytes],{type}),name);return true};
+ const saveBlob=(blob,name)=>{const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+ try{
+  if(!window.XLSX){
+   // Không tải được thư viện Excel (mất mạng): xuất CSV mở được bằng Excel.
+   const cell=v=>{const s=String(v);return /[",\n;]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+   const csv=[...rev,[],...bk].map(r=>r.map(cell).join(',')).join('\r\n');
+   if(!(await deliver('ngoi-photobooth-tuan-'+NS.weekKey()+'.csv',new TextEncoder().encode('\ufeff'+csv),'text/csv;charset=utf-8')))return;
+   say('Đã tải file CSV (không tải được thư viện Excel, file vẫn mở được bằng Excel).',true);return;
+  }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rev),'Doanh thu');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(bk),'Booking trong tuần');
+  const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'}),name='ngoi-photobooth-tuan-'+NS.weekKey()+'.xlsx';
+  if(!(await deliver(name,new Uint8Array(buf),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')))return;
+  say('Đã tải file Excel.',true);
+ }catch(e){say(e&&e.code==='declined'?'':'Không xuất được file, thử lại sau.')}
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TPL={'Nhắc lịch':x=>`Chào ${x.name}, Ngói Photobooth xin nhắc bạn có lịch chụp lúc ${x.t} hôm nay tại ${by(BR,x.b)?.n||''} (${by(RM,x.r)?.n||'phòng đã ngừng'}). Mã booking: ${x.code}. Hẹn gặp bạn!`,'Báo thay đổi':x=>`Chào ${x.name}, Ngói Photobooth xin phép trao đổi về lịch chụp lúc ${x.t} (mã ${x.code}). Bạn vui lòng phản hồi giúp Ngói nhé.`,'Gửi ảnh':x=>`Chào ${x.name}, Ngói Photobooth gửi bạn ảnh đã chụp: ${x.link||'(chưa có link)'} . Cảm ơn bạn đã ghé Ngói!`,'Cảm ơn':x=>`Cảm ơn ${x.name} đã chụp tại Ngói Photobooth. Mong nhận được góp ý của bạn để Ngói phục vụ tốt hơn!`};
+function openCt(id){const x=by(bookings,id);A.ct=id;A.tp=x.st==='done'?'Gửi ảnh':'Nhắc lịch';render();setTimeout(()=>{const e=$('ctp');if(e)e.scrollIntoView({block:'nearest',behavior:'smooth'})},0)}
+function ctLinks(){const x=by(bookings,A.ct),a=$('ctSms');if(a)a.href='sms:'+x.phone.replace(/\s/g,'')+'?body='+encodeURIComponent($('cmsg').value)}
+function copyMsg(b){try{navigator.clipboard.writeText($('cmsg').value);b.textContent='Đã sao chép'}catch(e){b.textContent='Không sao chép được'}}
+function contactPanel(){const x=A.ct?by(bookings,A.ct):null;if(!x)return '';const k=A.tp||'Nhắc lịch',msg=TPL[k](x),ph=(x.phone||'').replace(/\s/g,''),bs='padding:8px 16px;font-size:13.5px;text-decoration:none;display:inline-block';
+return `<div class="card" id="ctp" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><b>Liên hệ khách: ${esc(x.name)} · ${esc(x.phone)}</b><button class="btn ghost" onclick="A.ct=null;render()" style="padding:5px 12px;font-size:13px">Đóng</button></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0">${Object.keys(TPL).map(n=>`<button aria-pressed="${n===k}" onclick="A.tp='${n}';render()" style="padding:6px 12px;border-radius:999px;border:1.5px solid ${n===k?'var(--brand)':'var(--line)'};background:${n===k?'var(--brand)':'var(--surface)'};color:${n===k?'var(--brand-ink)':'var(--ink)'};font:500 13px inherit;cursor:pointer">${n}</button>`).join('')}</div><textarea id="cmsg" rows="4" aria-label="Nội dung tin nhắn" oninput="ctLinks()" style="width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);resize:vertical;font:inherit">${esc(msg)}</textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="tel:${esc(ph)}" style="${bs}">Gọi</a><a id="ctSms" class="btn ghost" href="sms:${esc(ph)}?body=${encodeURIComponent(msg)}" style="${bs}">Nhắn SMS</a><a class="btn ghost" href="https://zalo.me/${esc(ph)}" target="_blank" rel="noopener" style="${bs}">Zalo</a><button class="btn ghost" onclick="copyMsg(this)" style="padding:8px 16px;font-size:13.5px">Sao chép tin nhắn</button></div><p class="hint" style="text-align:left;margin:8px 0 0">Chọn mẫu tin, chỉnh nội dung nếu cần rồi gọi hoặc nhắn cho khách.</p></div>`}
+function doLogin(){sync();if($('lp').value===DB.password){A.in=true;render()}else $('lerr2').textContent='Mật khẩu chưa đúng.'}
+function pwPage(){
+ const field=(id,title,auto)=>`<div class="pw-field"><label for="${id}">${title}</label><input class="f" id="${id}" type="password" autocomplete="${auto}" required></div>`;
+ return `<section class="password-page" aria-labelledby="pw-title">
+   <div class="password-heading">
+     <span class="password-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
+     <h2 id="pw-title">Đổi mật khẩu</h2>
+     <p class="sub">Cập nhật mật khẩu để bảo vệ tài khoản quản lý của Ngói.</p>
+   </div>
+   <div class="card password-card">
+     <div class="pw-account"><span class="pw-account-icon" aria-hidden="true">N</span><div><span class="pw-caption">Tài khoản quản trị</span><strong>admin@ngoi.vn</strong></div></div>
+     <form class="pw-form" onsubmit="event.preventDefault();changePw()">
+       <div class="pw-fields">
+         ${field('pc','Mật khẩu hiện tại','current-password')}
+         ${field('pn','Mật khẩu mới','new-password')}
+         ${field('pr','Nhập lại mật khẩu mới','new-password')}
+       </div>
+       <p class="pw-helper">Mật khẩu mới cần tối thiểu 8 ký tự, bao gồm chữ và số.</p>
+       <label class="pw-check"><input type="checkbox" onchange="['pc','pn','pr'].forEach(i=>$(i).type=this.checked?'text':'password')"><span>Hiện mật khẩu</span></label>
+       <div id="pmsg" class="pw-message" role="status" aria-live="polite"></div>
+       <div class="pw-actions"><button type="submit" class="btn pw-save">Cập nhật mật khẩu</button><button type="button" class="btn btn-lite pw-logout" onclick="A.in=false;A.page='';render()">Đăng xuất</button></div>
+     </form>
+   </div>
+   <button type="button" class="pw-return" onclick="A.page='';render()">← Quay lại quản lý</button>
+ </section>`;
+}
+function changePw(){const c=$('pc').value,n=$('pn').value,r=$('pr').value,m=$('pmsg');let e='';
+ sync();if(c!==DB.password)e='Mật khẩu hiện tại chưa đúng.';
+ else if(n.length<8||!/[A-Za-z]/.test(n)||!/\d/.test(n))e='Mật khẩu mới cần ít nhất 8 ký tự, gồm cả chữ và số.';
+ else if(n===c)e='Mật khẩu mới phải khác mật khẩu hiện tại.';
+ else if(n!==r)e='Mật khẩu nhập lại chưa khớp.';
+ if(e){m.style.color='';m.textContent=e;return}
+ NS.update(db=>{db.password=n});sync();['pc','pn','pr'].forEach(i=>$(i).value='');m.style.color='var(--brand)';m.textContent='Đã đổi mật khẩu. Lần đăng nhập sau hãy dùng mật khẩu mới.'}
+function adminNav(){
+ const nw=FB.filter(x=>!x.r).length;
+ const t=(p,l)=>{const on=(A.page||'bk')===p;return `<button role="tab" aria-selected="${on}" class="admin-nav-tab ${on?'active':''}" onclick="A.page='${p}';render()">${l}</button>`};
+ return '<div class="demo-banner" role="note"><span aria-hidden="true">ⓘ</span><span><b>Bản demo.</b> Dữ liệu dùng chung với <a href="dat-lich.html" target="_blank" rel="noopener" style="color:var(--brand);font-weight:600">trang đặt lịch của khách ↗</a> · '+esc(NS.statusText())+'. Dữ liệu giữ trong tuần ('+NS.weekRange().from+'–'+NS.weekRange().to+'), <b>tự làm mới sáng thứ Hai '+NS.weekRange().nextReset+'</b>; cấu hình phòng, giá và mật khẩu được giữ lại. Lịch có nhãn “mẫu” và doanh thu theo tháng là số liệu minh họa.</span></div><div role="tablist" class="admin-main-nav" aria-label="Mục quản lý">'+t('bk','Lịch đặt')+t('list','Danh sách booking')+t('rv','Doanh thu')+t('fb','Góp ý & tin nhắn'+(nw?` <span class="nav-count">${nw}</span>`:''))+'</div>';
+}
+
+function fbPage(){return '<h2>Góp ý &amp; tin nhắn</h2><p class="sub">Tin khách gửi từ trang Liên hệ, theo chi nhánh bạn chọn (kèm góp ý chung).</p><select onchange="A.br=this.value;render()" aria-label="Chi nhánh">'+BR.map(b=>`<option value="${b.id}" ${A.br===b.id?'selected':''}>${b.n}</option>`).join('')+'</select>'+fbCard()}
+function togFB(id){NS.update(db=>{const x=db.messages.find(m=>m.id===id);if(x)x.r=x.r?0:1});sync();render()}
+function photoCell(x){
+ if(x.st!=='done')return '';
+ const link=x.link&&validPhotoUrl(x.link)?x.link:'';
+ if(link)return `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer" style="border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:4px;font-size:12.5px;color:var(--brand);text-decoration:none">Xem ảnh</a>${printCtl(x)}`;
+ return `<button onclick="showBooking(${x.id})">Thêm link ảnh</button>`;
+}
+function printCtl(x){const id=x.id;
+ if(A.pr===id)return `<input id="pq${id}" type="number" min="1" max="10" value="1" aria-label="Số ảnh in thêm" style="width:64px;padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font:inherit;margin-right:4px"><button onclick="doPrint(${id})">Xác nhận in</button><button onclick="A.pr=null;render()">Đóng</button>`;
+ return `<button onclick="A.pr=${id};render()">In thêm</button>${x.prints?`<span style="font-size:12.5px;color:var(--muted);margin-left:6px">Đã in thêm: ${x.prints} ảnh</span>`:''}`}
+function doPrint(id){const q=Math.max(1,Math.min(10,parseInt($('pq'+id).value)||1));NS.update(db=>{const x=findBk(db,id);if(x)x.prints=(x.prints||0)+q});sync();A.pr=null;render()}
+function saveL(id){const v=$('lk'+id).value.trim();if(v&&!/^https?:\/\//i.test(v)){A.lerr='Link phải bắt đầu bằng http:// hoặc https://';render();return}{const b=by(bookings,id);b.link=v;b.auto=0;persistPhotoLink(b)}A.ed=null;A.lerr='';render()}
+function copyL(id){try{navigator.clipboard.writeText(by(bookings,id).link)}catch(e){}A.cp=id;render()}
+function findCode(){A.q=$('qc').value;render()}
+function setS(id,s){NS.update(db=>{const x=findBk(db,id);if(x)x.st=s});sync();render()}
+render();
+</script><script>
+(function(){
+ var root=document.documentElement,KEY='ngoi_theme_v1';
+ function cur(){return root.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+ try{var saved=localStorage.getItem(KEY);if(saved==='dark'||saved==='light')root.setAttribute('data-theme',saved)}catch(e){}
+ var host=document.querySelector('header .tabs')||document.querySelector('header > div:last-child');
+ if(!host)return;
+ var b=document.createElement('button');b.type='button';b.className='theme-btn';
+ function paint(){var d=cur()==='dark';b.textContent=d?'☀️':'🌙';b.title=d?'Chuyển sang nền sáng':'Chuyển sang nền tối';b.setAttribute('aria-label',b.title)}
+ b.onclick=function(){var n=cur()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem(KEY,n)}catch(e){}paint()};
+ paint();host.appendChild(b);
+})();
+</script></body></html>

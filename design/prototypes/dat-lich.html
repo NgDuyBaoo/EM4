@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ngói Photobooth – Đặt lịch</title>
+<meta name="description" content="Đặt lịch chụp photobooth tại Ngói, Huế.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6EFE6;--surface:#FFFBF6;--ink:#3B2416;--muted:#8A6F5C;--brand:#7A4A2B;--brand-ink:#FFF8F0;--line:#E4D6C6;--sel:#F3DDBB;
+--free:#CDE8CB;--booked:#F8D49A;--shoot:#BBD6F3;--cancel:#F4B9B5;--done:#D9D2CA;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1D140E;--surface:#2A1D14;--ink:#F3E6D6;--muted:#B49A82;--brand:#D9A06B;--brand-ink:#2A1608;--line:#4A3626;--sel:#4A3320;--free:#2F5A33;--booked:#7A5A22;--shoot:#2D4E73;--cancel:#7A3A36;--done:#4A4038;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1D140E;--surface:#2A1D14;--ink:#F3E6D6;--muted:#B49A82;--brand:#D9A06B;--brand-ink:#2A1608;--line:#4A3626;--sel:#4A3320;--free:#2F5A33;--booked:#7A5A22;--shoot:#2D4E73;--cancel:#7A3A36;--done:#4A4038;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 'Be Vietnam Pro',system-ui,sans-serif}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif;margin:0}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:var(--brand);color:var(--brand-ink)}
+.logo{font:700 30px/1 'Playfair Display',serif}.logo small{display:block;font:500 9px 'Be Vietnam Pro';letter-spacing:.3em}
+.tabs{display:flex;background:rgba(0,0,0,.18);border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;color:inherit;padding:6px 14px;border-radius:999px;font:500 13px inherit;cursor:pointer}
+.tabs button.on{background:var(--brand-ink);color:var(--brand)}
+main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+.steps{display:flex;gap:6px;margin-bottom:20px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--line)}.steps i.on{background:var(--brand)}
+h2{font-size:26px;margin-bottom:4px}.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.opt{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--surface);color:inherit;border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;cursor:pointer;font:inherit}
+.opt.on{border-color:var(--brand);background:var(--sel)}
+.ph{width:84px;height:64px;border-radius:10px;flex:none;background:linear-gradient(135deg,#C9A27A,#7A4A2B)}
+.opt b{display:block;font-size:16px}.opt span{color:var(--muted);font-size:13px}
+.btn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:12px 22px;font:600 15px inherit;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}.btn.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.code{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.code input{width:46px;height:56px;text-align:center;font:600 24px 'Playfair Display',serif;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+input.f,select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:10px}
+.hint{font-size:12.5px;color:var(--muted);text-align:center}.err{color:#C0392B;text-align:center;min-height:22px;font-size:13.5px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px;max-height:340px;overflow:auto;padding:2px}
+.slot{padding:10px 0;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:500 14px inherit;cursor:pointer}
+.slot.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.slot:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+dl{display:grid;grid-template-columns:90px 1fr;gap:8px 12px;margin:0}dt{color:var(--muted)}dd{margin:0;font-weight:500}
+.ok{width:72px;height:72px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-size:36px;margin:0 auto 12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat b{font:700 26px 'Playfair Display',serif;display:block}.stat span{color:var(--muted);font-size:13px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin:10px 0}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.scroll{overflow-x:auto;max-height:300px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.g td.c{height:26px;border-left:2px solid var(--bg)}
+.pill{padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:500;color:#2B1B10}
+.s-booked{background:var(--booked)}.s-shoot{background:var(--shoot)}.s-cancel{background:var(--cancel)}.s-done{background:var(--done)}
+td button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:4px 9px;margin-right:4px;font:inherit;font-size:12.5px;cursor:pointer}
+.hide{display:none}
+.slot{position:relative}.slot.off{color:var(--muted);background:var(--bg);text-decoration:line-through;cursor:not-allowed}.slot.off:hover{border-color:var(--line);background:var(--bg)}
+header{position:relative;margin-bottom:16px;background:radial-gradient(circle at 11px 0,transparent 8px,rgba(255,248,240,.14) 8.5px 9.5px,transparent 10px) 0 0/22px 11px,var(--brand)}
+header::after{content:"";position:absolute;left:0;right:0;top:100%;height:11px;background:radial-gradient(circle at 11px 0,var(--brand) 10px,transparent 10.5px) 0 0/22px 11px}
+.logo{font-size:34px;letter-spacing:-.01em}
+h2{font-size:30px;line-height:1.2;letter-spacing:-.01em}
+.sub{font-size:14.5px;max-width:56ch}
+main{padding-top:24px}
+.card{border-radius:20px;padding:20px;box-shadow:0 10px 30px -18px rgba(59,36,22,.45)}
+.steps{gap:8px}.steps i{height:6px;border-radius:6px;transition:background .3s}
+.opt{position:relative;border-radius:20px;padding:14px 16px;transition:transform .15s,box-shadow .15s,border-color .15s}
+.opt:hover{transform:translateY(-1px)}
+.opt.on{box-shadow:0 0 0 4px var(--sel);border-color:var(--brand)}
+.opt.on::after{content:"✓";position:absolute;right:16px;top:14px;width:26px;height:26px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-size:14px;font-weight:600}
+.opt b{font:600 19px 'Playfair Display',serif}
+.ph{width:104px;height:80px;border:5px solid #FFFBF6;border-radius:6px;box-shadow:0 4px 12px -4px rgba(59,36,22,.5);transform:rotate(-3deg);background:linear-gradient(160deg,#E2C49C,#B07A4D 55%,#7A4A2B)}
+.opt:nth-of-type(even) .ph{transform:rotate(2.5deg)}
+.btn{border-radius:12px;padding:14px 26px;box-shadow:0 8px 18px -10px var(--brand);transition:transform .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn.ghost{box-shadow:none}
+.slot{border-radius:10px;padding:7px 0;font-size:13.5px;transition:border-color .15s,background .15s}
+.slot:hover:not(:disabled){border-color:var(--brand);background:var(--sel)}
+.slot.on{box-shadow:0 6px 14px -8px var(--brand)}
+.code input{width:50px;height:60px;border-radius:12px}
+.code input:focus,input.f:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--sel)}
+button:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.ok{box-shadow:0 0 0 8px var(--sel)}
+.stat{padding:16px 18px}.stat b{font-size:30px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Một lưới giờ liên tục, nhỏ gọn trên cả điện thoại và máy tính */
+.slots.compact-slots{grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:7px;max-height:308px;overflow-y:auto;overscroll-behavior:contain;padding:4px 3px 8px;scrollbar-width:thin}
+.compact-slots .slot{min-height:36px;padding:7px 3px;border-radius:8px;font-size:12.5px;line-height:1.15}
+.compact-slots .slot.on:hover{background:var(--brand);color:var(--brand-ink)}
+@media(max-width:480px){.slots.compact-slots{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-height:296px}.compact-slots .slot{min-height:36px;font-size:12.5px}}
+.range-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.range-btn{padding:10px 3px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 12px 'Be Vietnam Pro',sans-serif;cursor:pointer}.range-btn.active{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}.range-btn small{font-size:11px}.compact-slots{grid-template-columns:repeat(6,minmax(0,1fr));max-height:none;overflow:visible}.compact-slots .slot{padding:10px 0}@media(max-width:550px){.range-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.compact-slots{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* Tooltip nổi ngoài lưới: không bị che bởi thẻ giờ hoặc khung cuộn. */
+#booking-time-tooltip{position:fixed;z-index:9999;display:none;pointer-events:none;padding:8px 12px;border-radius:9px;background:var(--ink);color:var(--bg);font:600 12px 'Be Vietnam Pro',sans-serif;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+#booking-time-tooltip.visible{display:block}
+.slot.off[data-tip="Đã đặt"]{text-decoration:line-through;text-decoration-thickness:1.5px}
+.slot.off[data-tip]:hover,.slot.off[data-tip]:focus-visible{border-color:var(--muted);background:var(--bg)}
+
+/* Thông tin địa chỉ, bản đồ và liên hệ chỉ hiển thị trong trang Liên hệ. */
+.branch-footer{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;margin:0 17px;padding:11px 0 13px;border-top:1px solid var(--line)}
+.branch-phone{display:inline-flex;align-items:center;gap:7px;font:500 13px 'Be Vietnam Pro',sans-serif;color:var(--ink);min-width:0}
+.branch-phone svg,.branch-map svg{width:16px;height:16px;flex:none}
+.branch-phone a{color:var(--brand);font-weight:600;text-decoration:none}
+.branch-phone a:hover{text-decoration:underline}
+.branch-phone .no-phone{color:var(--muted);font-weight:400}
+.branch-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.branch-map{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);padding:7px 11px;border-radius:10px;background:var(--surface);color:var(--brand);text-decoration:none;font:600 12.5px 'Be Vietnam Pro',sans-serif;white-space:nowrap;cursor:pointer}
+.branch-map{border-color:var(--brand)}
+.branch-map:hover{background:var(--sel)}
+.branch-contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
+.branch-mini{padding:16px 17px}
+.branch-mini .branch-footer{margin:10px 0 0;padding-bottom:0}
+.branch-mini-title{font:600 17px/1.3 'Playfair Display',serif}
+.branch-mini-address{display:block;color:var(--muted);font-size:13px;margin-top:5px}
+@media(max-width:530px){.branch-phone{width:100%}.branch-actions{width:100%}.branch-map{flex:1}}
+
+/* Contact page — compact editorial layout; deliberately scoped to contact-* selectors. */
+.contact-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.contact-head h2{margin:0 0 6px}
+.contact-head .sub{margin:0;font-size:14px;line-height:1.6}
+.contact-back{display:inline-flex;gap:6px;align-items:center;flex:none;border:1px solid var(--line);color:var(--brand);background:var(--surface);border-radius:10px;padding:9px 12px;font:600 12px 'Be Vietnam Pro',sans-serif;cursor:pointer}
+.contact-back:hover{background:var(--sel)}
+.contact-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start;gap:16px}
+.contact-layout .card{padding:23px;border-radius:18px}
+.contact-card-head{display:flex;align-items:center;gap:11px;margin-bottom:19px}
+.contact-card-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:11px;color:var(--brand);background:var(--sel)}
+.contact-card-icon svg{width:20px;height:20px}
+.contact-card-head h3{font:700 18px/1.35 'Be Vietnam Pro',sans-serif;letter-spacing:-.025em;margin:0}
+.contact-card-head p{font:400 12px/1.6 'Be Vietnam Pro',sans-serif;color:var(--muted);margin:3px 0 0}
+.contact-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+.contact-field{min-width:0}
+.contact-field.wide{grid-column:1/-1}
+.contact-field label{display:block;margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.contact-field .optional{font-size:11px;font-weight:400;color:var(--muted)}
+.contact-field .required{color:#B86A45}
+.contact-field input,.contact-field select,.contact-field textarea{display:block;width:100%;min-width:0;margin:0;border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--surface);color:var(--ink);font:400 13.5px/1.5 'Be Vietnam Pro',sans-serif;outline:none}
+.contact-field input,.contact-field select{height:45px}
+.contact-field textarea{resize:vertical;min-height:106px;max-height:260px}
+.contact-field input::placeholder,.contact-field textarea::placeholder{color:var(--muted);opacity:.8}
+.contact-field input:focus,.contact-field select:focus,.contact-field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--sel)}
+.contact-form-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
+.contact-demo-note{max-width:230px;color:var(--muted);font-size:11px;line-height:1.5}
+.contact-submit{padding:11px 18px;min-height:44px;white-space:nowrap;font-size:13.5px}
+.contact-error{display:none;margin:10px 0 0;color:#B4362A;font-size:12.5px}
+.contact-error.visible{display:block}
+.contact-location-item{padding:13px 0 14px;border-top:1px solid var(--line)}
+.contact-location-item:first-child{padding-top:1px;border-top:0}
+.contact-place-top{display:flex;gap:10px;align-items:start}
+.contact-place-number{flex:none;display:grid;place-items:center;background:var(--bg);color:var(--muted);font-weight:600;font-size:11px;width:28px;height:28px;border-radius:8px}
+.contact-place-name{font:600 14px/1.4 'Be Vietnam Pro',sans-serif;letter-spacing:-.02em}
+.contact-place-address{font-size:12.5px;color:var(--muted);margin-top:3px}
+.contact-place-detail{margin:11px 0 12px 38px;display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+.contact-place-detail svg{width:15px;height:15px;flex:none;color:var(--brand)}
+.contact-place-detail a{color:var(--brand);font-weight:600;text-decoration:none}
+.contact-map-btn{margin-left:38px;display:inline-flex;align-items:center;gap:7px;color:var(--brand);font:600 12.5px 'Be Vietnam Pro',sans-serif;text-decoration:none;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.contact-map-btn:hover{background:var(--sel);border-color:var(--brand)}
+.contact-map-btn svg{width:15px;height:15px}
+.contact-map-hint{border-top:1px solid var(--line);padding-top:12px;margin:0;color:var(--muted);font-size:11px;line-height:1.6}
+.contact-success{max-width:510px;margin:12px auto 0;text-align:center}
+.contact-success h2{font-size:25px}
+.contact-success p{margin:6px auto 16px;color:var(--muted);font-size:13.5px}
+@media(max-width:720px){.contact-layout{grid-template-columns:minmax(0,1fr)}.contact-layout .card{padding:20px}.contact-form-bottom{flex-wrap:wrap}.contact-demo-note{max-width:none}}
+@media(max-width:430px){.contact-head{display:block}.contact-back{margin-top:13px}.contact-form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.contact-form-bottom{display:flex;flex-direction:column-reverse;align-items:stretch}.contact-submit{width:100%}.contact-demo-note{text-align:center}}
+
+/* Nút điều hướng thống nhất ở Lịch của tôi và Liên hệ: chỉ chữ ở trạng thái thường. */
+.page-text-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;background:transparent;color:var(--brand);padding:10px 16px;border-radius:10px;font:600 13px 'Be Vietnam Pro',sans-serif;cursor:pointer;box-shadow:none;text-decoration:none;transition:background .16s,color .16s,border-color .16s}
+.page-text-btn:hover{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.page-text-btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+/* ===== Làm mới giao diện: màu nhấn, header phẳng, pill dịu, công tắc sáng/tối ===== */
+:root{--accent:#B85A25;--accent-ink:#FFFFFF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--accent:#E08A4F;--accent-ink:#2A1608}}
+:root[data-theme="dark"]{--accent:#E08A4F;--accent-ink:#2A1608}
+header{background:var(--brand);border-bottom:1px solid rgba(0,0,0,.12)}
+header::after{display:none}
+.btn:not(.ghost){background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 18px -12px var(--accent)}
+.btn:not(.ghost):disabled{opacity:.45}
+.steps i.on{background:var(--accent)}
+.slot.on,.compact-slots .slot.on:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt.on{border-color:var(--accent);box-shadow:0 0 0 4px var(--sel)}
+.opt.on::after,.ok{background:var(--accent);color:var(--accent-ink)}
+.ph,.opt:nth-of-type(even) .ph{transform:none;border:0;border-radius:14px;box-shadow:0 6px 16px -8px rgba(59,36,22,.45)}
+.stat b,.stat strong{font-family:'Be Vietnam Pro',system-ui,sans-serif;font-weight:700;letter-spacing:-.02em}
+.pill{position:relative;padding:3px 11px 3px 23px;background:var(--surface)!important;border:1px solid var(--line);color:var(--ink)}
+.pill::before{content:"";position:absolute;left:9px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--dot,var(--muted))}
+.s-booked{--dot:#E5A23A}.s-shoot{--dot:#4A90D9}.s-cancel{--dot:#D9534F}.s-done{--dot:#9A8F84}
+.theme-btn{border:1px solid currentColor;background:none;color:var(--brand-ink);border-radius:10px;padding:7px 11px;font-size:14px;line-height:1;cursor:pointer}
+.site-foot{max-width:880px;margin:0 auto;padding:14px 16px 32px;display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}.site-foot a{color:var(--brand);text-decoration:none;font-weight:500}.site-foot a:hover{text-decoration:underline}
+</style></head><body><div id="booking-time-tooltip" role="tooltip" aria-hidden="true"></div>
+<header><div class="logo">Ngói<small>PHOTOBOOTH</small></div><div style="display:flex;gap:8px"><button class="btn ghost" onclick="openMine()" style="color:var(--brand-ink);border-color:var(--brand-ink);padding:7px 14px;font-size:13px">Lịch của tôi</button><button class="btn ghost" onclick="openContact()" style="color:var(--brand-ink);border-color:var(--brand-ink);padding:7px 14px;font-size:13px">Liên hệ</button></div>
+</header>
+<main><div id="app"></div></main>
+<footer class="site-foot"><span>Ngói Photobooth · Huế · <span id="store-state"></span></span><span><a href="index.html">Giới thiệu bản demo</a> · <a href="quan-ly.html">Trang quản lý (nhân viên)</a></span></footer>
+<script src="firebase-config.js"></script>
+<script src="ngoi-store.js"></script>
+<script>
+// Dữ liệu chi nhánh, phòng, giá, giờ mở cửa và booking lấy từ kho dùng chung (ngoi-store.js),
+// nên mọi thay đổi ở trang Quản lý được áp dụng ngay cho trang này.
+const NS=window.NgoiStore;
+const BR=NS.BRANCHES;
+const ST={booked:['Đã đặt','s-booked'],shoot:['Đang chụp','s-shoot'],cancel:['Đã hủy','s-cancel'],done:['Hoàn thành','s-done']};
+const pad=n=>String(n).padStart(2,'0');
+const dowN=['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let DB,RM=[],bookings=[],TODAY='',dlabel='';
+// Ngày được tính lại mỗi lần đồng bộ: trang mở qua nửa đêm sẽ tự chuyển sang ngày mới.
+function sync(){const d=new Date();TODAY=NS.today();dlabel=dowN[d.getDay()]+', '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();DB=NS.load();RM=NS.rooms(DB).map(r=>({...r,d:r.price}));bookings=DB.bookings.filter(x=>x.date===TODAY)}
+sync();
+const STORE_FULL='Không lưu được vì bộ nhớ trình duyệt đã đầy. Vui lòng báo nhân viên Ngói hoặc thử lại trên trình duyệt khác.';
+const branchRooms=b=>RM.filter(r=>r.b===b&&r.active);
+const cfgOf=b=>DB.config[b]||{open:'08:30',close:'22:30'};
+const inHours=(r,t)=>!!r&&NS.roomAvailable(DB,r.b,r,t);
+let S={step:1,b:null,rs:[],sel:[],name:'',phone:'',err:''};
+const vnd=n=>n.toLocaleString('vi-VN')+'đ';const $=s=>document.getElementById(s),by=(l,i)=>l.find(x=>x.id===i);
+const taken=(b,r,t)=>bookings.some(x=>x.b===b&&x.r===r&&x.t===t&&x.st!=='cancel');
+const past=t=>{const d=new Date(),[h,m]=t.split(':');return +h*60+ +m<=d.getHours()*60+d.getMinutes()};
+function go(n){S.step=n;S.err='';render()}
+function reset(){const unlocked=!!S.unlocked;S={step:unlocked?2:1,b:null,rs:[],sel:[],name:'',phone:'',err:'',unlocked};render()}
+const PEEK={r1:{bg:[['Be kem','#E8D8BE'],['Nâu cà phê','#7A4A2B'],['Rèm ren','#F3EBDD']],fb:[['Minh Anh','Ánh sáng ấm, lên hình rất vintage.','#D9B58A'],['Hải Đăng','Phòng gọn, phông be rất sang.','#C79A6B'],['Thu Hà','Chụp nhóm 3 người vẫn rộng.','#E2C8A3']]},r2:{bg:[['Trắng','#F4F1EC'],['Xám khói','#8E8A86'],['Đen','#2B2622']],fb:[['Bảo Ngọc','Tông trắng đen sạch, ảnh rất nét.','#BDB7B0'],['Quốc Việt','Đèn đều, không bị chói.','#8E8A86'],['Lan Chi','Hợp chụp profile và kỷ yếu.','#CFC9C1']]},r3:{bg:[['Xanh rêu','#5E6B4A'],['Đỏ gạch','#A5502F'],['Vàng nắng','#D9A441']],fb:[['Khánh Linh','Màu film đúng như mong đợi.','#A5502F'],['Tuấn Kiệt','Phông xanh rêu lên ảnh rất đẹp.','#5E6B4A'],['Mai Phương','Nhiều đạo cụ để tạo dáng.','#D9A441']]}};
+Object.assign(PEEK,{b2modern:PEEK.r2,b2vintage:PEEK.r1,b2film:PEEK.r3,b2self:{bg:[['Hồng pastel','#E9C6C0'],['Xanh mint','#BFD8C9'],['Trắng','#F4F1EC']],fb:[['Ngọc Hân','Tự bấm máy, chụp thoải mái.','#E9C6C0'],['Gia Bảo','Giá mềm, hợp đi nhóm bạn.','#BFD8C9'],['Diệu Linh','Nhiều khung ảnh dễ thương.','#E2C8A3']]}});
+const SOCIAL={facebook:'',instagram:'',tiktok:''};
+const ICONS={facebook:'<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.9v3h2.6V21h3z"/></svg>',instagram:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',tiktok:'<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M16.5 3c.3 2.3 1.7 3.8 4 4v3c-1.5 0-2.9-.5-4-1.300V15a6 6 0 1 1-6-6c.3 0 .6 0 .9.1v3.2a2.900 2.900 0 1 0 1.900 2.700V3h3.200z"/></svg>'};
+function socials(){return '<div style="display:flex;gap:12px;justify-content:center;margin-top:16px">'+Object.keys(ICONS).map(k=>{const u=SOCIAL[k],st='width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--brand);color:var(--brand);background:var(--surface)';return u?`<a href="${u}" target="_blank" rel="noopener" aria-label="${k}" style="${st}">${ICONS[k]}</a>`:`<span role="img" aria-label="${k} (chưa có link)" title="Chưa có link" style="${st};opacity:.45">${ICONS[k]}</span>`}).join('')+'</div><p class="hint" style="margin-top:8px">Link Facebook, Instagram, TikTok sẽ được cập nhật khi Ngói có tài khoản chính thức.</p>'}
+
+// Google Maps mở tìm kiếm theo địa chỉ thật; không tự tạo ghim/toạ độ.
+const PIN_ICON='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+const PHONE_ICON='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.08 3h3a2 2 0 0 1 2 1.72l.4 2.81a2 2 0 0 1-.57 1.7L8.1 11a16 16 0 0 0 4.9 4.9l1.77-1.81a2 2 0 0 1 1.7-.57l2.81.4A2 2 0 0 1 22 16.92Z"/></svg>';
+const mapLink=b=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(b.n+', '+b.a+', Việt Nam');
+function branchContactRow(b){
+ const phone=b.phone?.trim();
+ const call=phone?`<a href="tel:${phone.replace(/[^+0-9]/g,'')}" aria-label="Gọi ${b.n} số ${phone}">${phone}</a>`:'<span class="no-phone">Đang cập nhật</span>';
+ return `<div class="branch-footer"><div class="branch-phone">${PHONE_ICON}<span>SĐT: ${call}</span></div><div class="branch-actions"><a class="branch-map" href="${mapLink(b)}" target="_blank" rel="noopener noreferrer" aria-label="Xem ${b.n} trên Google Maps" title="Mở Google Maps">${PIN_ICON}<span>Xem bản đồ</span></a></div></div>`;
+}
+function contactBranchCard(b){return `<div class="card branch-mini"><div class="branch-mini-title">${b.n}</div><span class="branch-mini-address">${b.a}</span>${branchContactRow(b)}</div>`;}
+
+function openContact(){if(S.step!==8)S.previousStep=S.step;S.step=8;S.sent=false;S.err='';render()}
+function backFromContact(){const p=S.previousStep;S.step=!S.unlocked?1:(p>=2&&p<=7?p:2);S.err='';render()}
+function sendMsg(ev){
+ if(ev)ev.preventDefault();
+ const n=$('cn').value.trim(),c=$('cc').value.trim(),m=$('cm').value.trim();
+ const err=$('cerr');
+ if(!c||!m){err.textContent='Vui lòng nhập thông tin liên hệ và nội dung lời nhắn.';err.classList.add('visible');(!c?$('cc'):$('cm')).focus();return}
+ // Lời nhắn được lưu vào kho chung, trang Quản lý thấy ở mục “Góp ý & tin nhắn”.
+ const k=$('ck').value,b=$('cb').value;
+ const ok=NS.update(db=>{db.messages.unshift({id:NS.nextId(db),b,n:n||'Khách',c,k,m,createdAt:new Date().toISOString(),r:0});return true});
+ if(!ok){err.textContent=STORE_FULL;err.classList.add('visible');return}
+ S.sent=true;render();
+}
+function contactView(){
+ const back='<button type="button" class="page-text-btn" onclick="backFromContact()" aria-label="Quay lại">Quay lại</button>';
+ if(S.sent)return `<div class="card contact-success"><div class="ok">✓</div><h2>Ngói đã nhận lời nhắn</h2><p>Cảm ơn bạn! Ngói sẽ liên hệ lại qua số điện thoại hoặc email bạn để lại.</p><button class="page-text-btn" onclick="backFromContact()">Quay lại</button> <button class="page-text-btn" onclick="S.sent=false;render()">Gửi lời nhắn khác</button></div>`;
+ const envelope='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>';
+ const mapIcon=PIN_ICON;
+ const header=`<div class="contact-head"><div><h2>Liên hệ Ngói</h2><p class="sub">Gửi lời nhắn hoặc xem địa chỉ và thông tin liên hệ của Ngói.</p></div>${back}</div>`;
+ const form=`<section class="card contact-form-card" aria-labelledby="contact-form-title"><div class="contact-card-head"><span class="contact-card-icon">${envelope}</span><div><h3 id="contact-form-title">Gửi lời nhắn</h3><p>Ngói luôn sẵn sàng lắng nghe bạn</p></div></div><form id="contact-form" onsubmit="sendMsg(event)" novalidate><div class="contact-form-grid"><div class="contact-field"><label for="cb">Chi nhánh</label><select id="cb" name="branch"><option value="">Góp ý chung</option>${BR.map(b=>`<option value="${b.id}">${b.n}</option>`).join('')}</select></div><div class="contact-field"><label for="ck">Nội dung liên hệ</label><select id="ck" name="subject"><option>Nhắn tin riêng</option><option>Góp ý dịch vụ</option><option>Hỏi về lịch đã đặt</option><option>Khác</option></select></div><div class="contact-field"><label for="cn">Họ và tên <span class="optional">(không bắt buộc)</span></label><input id="cn" name="name" type="text" placeholder="Tên của bạn" autocomplete="name" maxlength="100"></div><div class="contact-field"><label for="cc">Điện thoại / email <span class="required">*</span></label><input id="cc" name="reply" type="text" placeholder="Để Ngói liên hệ lại" autocomplete="on" maxlength="120" required></div><div class="contact-field wide"><label for="cm">Lời nhắn <span class="required">*</span></label><textarea id="cm" name="message" rows="4" placeholder="Bạn muốn nhắn gì với Ngói?" maxlength="2000" required></textarea></div></div><p id="cerr" class="contact-error" role="alert"></p><div class="contact-form-bottom"><span class="contact-demo-note">Lời nhắn được chuyển tới trang quản lý của Ngói.</span><button type="submit" class="btn contact-submit">Gửi lời nhắn <span aria-hidden="true">↗</span></button></div></form></section>`;
+ const place=b=>{const ph=b.phone?.trim();const call=ph?`<a href="tel:${ph.replace(/[^+0-9]/g,'')}">${ph}</a>`:'<span>Đang cập nhật số điện thoại</span>';return `<div class="contact-location-item"><div class="contact-place-top"><div class="contact-place-number">${b.id==='b1'?'01':'02'}</div><div><div class="contact-place-name">${b.n}</div><div class="contact-place-address">${b.a}</div></div></div><div class="contact-place-detail">${PHONE_ICON}${call}</div><a class="contact-map-btn" href="${mapLink(b)}" target="_blank" rel="noopener noreferrer" aria-label="Xem ${b.n} trên Google Maps">${mapIcon} Xem Google Maps <span aria-hidden="true">↗</span></a></div>`};
+ const info=`<aside class="card contact-info-card" aria-labelledby="contact-info-title"><div class="contact-card-head"><span class="contact-card-icon">${mapIcon}</span><div><h3 id="contact-info-title">Chi nhánh Ngói</h3><p>Địa chỉ & hướng dẫn đường đi</p></div></div>${BR.map(place).join('')}<p class="contact-map-hint">Chọn “Xem Google Maps” để mở vị trí chi nhánh trên bản đồ.</p></aside>`;
+ const social=Object.values(SOCIAL).some(Boolean)?socials():'';
+ return header+`<div class="contact-layout">${form}${info}</div>`+social;
+}
+function openMine(){S.step=7;S.cf=null;S.err='';render()}
+function doCancel(id){NS.update(db=>{const x=db.bookings.find(b=>b.id===id);if(x&&x.st==='booked'&&!past(x.t))x.st='cancel'});sync();S.cf=null;render()}
+function mineView(){const mine=NS.myIds(),L=bookings.filter(x=>mine.includes(x.id)).sort((a,b)=>a.t.localeCompare(b.t));let h=`<h2>Lịch của tôi</h2><p class="sub">${dlabel}. Bận thì bạn có thể hủy lịch trước giờ chụp.</p>`;h+=L.length?L.map(x=>{const r=by(RM,x.r)||{n:'Phòng đã ngừng',t:'',d:0},b=by(BR,x.b)||{n:''},p=ST[x.st]||ST.booked,can=x.st==='booked'&&!past(x.t);return `<div class="card" style="margin-bottom:10px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b style="font:600 18px 'Playfair Display',serif">${x.t} · ${esc(r.n)}${r.t?' ('+esc(r.t)+')':''}</b><br><span style="color:var(--muted);font-size:13px">${esc(b.n)} · ${vnd(r.d)} · Mã <b>${esc(x.code||'')}</b></span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="pill ${p[1]}">${p[0]}</span>`+(can?(S.cf===x.id?`<button class="btn" style="padding:8px 14px" onclick="doCancel(${x.id})">Xác nhận hủy</button><button class="btn ghost" style="padding:8px 14px" onclick="S.cf=null;render()">Giữ lịch</button>`:`<button class="btn ghost" style="padding:8px 14px" onclick="S.cf=${x.id};render()">Hủy lịch</button>`):'')+'</div></div>'}).join(''):'<div class="card" style="text-align:center">Bạn chưa có lịch nào hôm nay.</div>';return h+'<div class="row"><button class="page-text-btn" onclick="go(S.unlocked?2:1)" aria-label="Quay lại">Quay lại</button><button class="page-text-btn" onclick="reset()">Đặt lịch mới</button></div>'}
+const HIST={b1:{r1:128,r2:74,r3:91},b2:{b2modern:112,b2vintage:60,b2film:55,b2self:41}};
+const nBook=(b,r)=>(HIST[b]?.[r]||0)+bookings.filter(x=>x.b===b&&x.r===r&&x.st!=='cancel').length;
+const bestR=b=>{const ids=branchRooms(b).map(r=>r.id);return ids.length?ids.reduce((a,c)=>nBook(b,c)>nBook(b,a)?c:a):null};
+function hot(r){return bestR(S.b)===r.id?'<i style="font:600 11px \'Be Vietnam Pro\',sans-serif;font-style:normal;background:var(--brand);color:var(--brand-ink);padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:3px">Best seller</i>':''}
+function slotView(){
+ if(!S.rs.includes(S.tab))S.tab=S.rs[0];
+ const tabs='<div role="tablist" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px">'+S.rs.map(id=>{const r=by(RM,id),on=id===S.tab;return `<button role="tab" aria-selected="${on}" onclick="S.tab='${id}';render()" style="flex:1;min-width:110px;padding:10px 12px;border-radius:12px;border:1.5px solid ${on?'var(--brand)':'var(--line)'};background:${on?'var(--brand)':'var(--surface)'};color:${on?'var(--brand-ink)':'var(--ink)'};font:600 14px inherit;cursor:pointer">${esc(r.n)}</button>`}).join('')+'</div>';
+ const r=by(RM,S.tab);
+ const cfg=cfgOf(S.b),open=NS.minutes(cfg.open),close=NS.minutes(cfg.close),TIMES=NS.times(cfg.open,cfg.close);
+ const ranges=[];for(let start=open;start<close;start+=120){const end=Math.min(start+120,close);ranges.push([start,end]);}
+ const fmt=m=>pad(Math.floor(m/60))+':'+pad(m%60);
+ if(S.range==null||S.range<0||S.range>=ranges.length){const d=new Date(),current=d.getHours()*60+d.getMinutes();S.range=Math.max(0,ranges.findIndex(([a,b])=>current<b));}
+ const rangesUI='<div class="range-picker" aria-label="Chọn khoảng giờ">'+ranges.map(([a,b],i)=>{const on=i===S.range;return `<button class="range-btn ${on?'active':''}" aria-pressed="${on}" onclick="S.range=${i};render()">${fmt(a)}–${fmt(b)}</button>`}).join('')+'</div>';
+ const [start,end]=ranges[S.range];
+ const grid='<div class="slots compact-slots" aria-label="Khung giờ từ '+fmt(start)+' đến '+fmt(end)+'">'+TIMES.filter(t=>{const m=Number(t.slice(0,2))*60+Number(t.slice(3));return m>=start&&m<end}).map(t=>{const on=S.sel.includes(S.tab+'|'+t),closed=!inHours(r,t),busy=!closed&&taken(S.b,S.tab,t),expired=!closed&&!busy&&past(t);return `<button class="slot ${on?'on':''} ${closed||busy||expired?'off':''}" ${closed?'data-tip="Ngoài giờ phòng" title="Ngoài giờ phòng" aria-label="'+t+' – Ngoài giờ phòng" aria-disabled="true"':busy?'data-tip="Đã đặt" title="Đã đặt" aria-label="'+t+' – Đã đặt" aria-disabled="true"':expired?'data-tip="Đã qua giờ" title="Đã qua giờ" aria-label="'+t+' – Đã qua giờ" aria-disabled="true"':''} aria-pressed="${on}" onclick="togT('${S.tab}','${t}')">${t}</button>`}).join('')+'</div>';
+ const sum=S.sel.length?`<details class="card" open style="margin-top:12px;padding:10px 14px"><summary style="cursor:pointer;font-weight:500">Đã chọn ${S.sel.length} lượt · Tổng ${vnd(S.sel.reduce((a,k)=>a+by(RM,k.split('|')[0]).d,0))}</summary><dl style="margin-top:8px">${sumRows()}</dl></details>`:'';
+ // Báo rõ khi phòng đã kín cả ngày hoặc khoảng giờ đang xem đã kín.
+ const openNow=t=>inHours(r,t)&&!taken(S.b,S.tab,t)&&!past(t);
+ const leftAll=TIMES.filter(openNow).length,leftRange=TIMES.filter(t=>{const m=NS.minutes(t);return m>=start&&m<end&&openNow(t)}).length;
+ const note=!leftAll?`<div class="card" role="status" style="margin:0 0 10px;padding:12px 14px;font-size:13.5px"><b>${esc(r.n)} đã kín lịch hoặc hết giờ nhận khách hôm nay.</b> Bạn hãy chọn phòng khác ở bước trước.</div>`:!leftRange?`<div role="status" style="font-size:13px;color:var(--muted);margin:0 0 8px">Khoảng giờ này đã kín. Còn ${leftAll} khung trống ở các khoảng giờ khác.</div>`:'';
+ return tabs+`<div style="font-size:13.5px;color:var(--muted);margin-bottom:10px">${esc(r.t)} · ${vnd(r.d)}/lượt · Giờ hoạt động ${r.open}–${r.close}</div><div style="font-weight:600;margin-bottom:8px">Chọn khoảng giờ</div>`+rangesUI+`<div style="font-size:13px;color:var(--muted);margin:12px 0 8px">Chọn giờ ${fmt(start)}–${fmt(end)} · Giờ gạch ngang: rê chuột để xem trạng thái</div>`+note+grid+sum;
+}
+function togV(id){S.v=S.v===id?null:id;render()}
+function peek(r){const p=PEEK[r.id],o=S.v===r.id;if(!p)return '';return `<div style="margin:-4px 0 12px"><button class="btn ghost" style="padding:6px 12px;font-size:13px" aria-expanded="${o}" onclick="togV('${r.id}')">${o?'Ẩn':'Xem'} phông &amp; ảnh khách chụp</button>`+(o?`<div class="card" style="margin-top:8px"><b>Phông có trong phòng</b><div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 14px">${p.bg.map(([n,c])=>`<div style="text-align:center;font-size:12.5px"><div style="width:64px;height:44px;border-radius:8px;background:${c};border:1px solid var(--line)"></div>${n}</div>`).join('')}</div><b>Ảnh khách đã chụp</b> <span style="color:var(--muted);font-size:12px">(ảnh và nhận xét minh họa)</span><div class="stats" style="margin:8px 0 0">${p.fb.map(([n,q,c])=>`<div><div style="height:96px;border-radius:10px;background:linear-gradient(135deg,${c},var(--brand))" role="img" aria-label="Ảnh minh họa"></div><div style="font-size:13px;margin-top:4px"><b>${n}</b><br><span style="color:var(--muted)">${q}</span></div></div>`).join('')}</div></div>`:'')+'</div>'}
+function togR(id){S.rs=branchRooms(S.b).map(r=>r.id).filter(i=>i===id?!S.rs.includes(id):S.rs.includes(i));S.sel=S.sel.filter(k=>S.rs.includes(k.split('|')[0]));render()}
+function togT(id,t){if(!inHours(by(RM,id),t)||taken(S.b,id,t)||past(t))return;S.err='';const k=id+'|'+t;S.sel=S.sel.includes(k)?S.sel.filter(x=>x!==k):[...S.sel,k];render()}
+function sumRows(){let tot=0,h='';RM.filter(r=>S.rs.includes(r.id)).forEach(r=>{const ts=S.sel.filter(k=>k.startsWith(r.id+'|')).map(k=>k.split('|')[1]).sort();if(!ts.length)return;tot+=ts.length*r.d;h+=`<dt>${esc(r.n)}</dt><dd>${ts.join(', ')}<br><span style="color:var(--muted)">${ts.length} slot × ${vnd(r.d)} = ${vnd(ts.length*r.d)}</span></dd>`});return h+`<dt>Tổng</dt><dd>${vnd(tot)}</dd>`}
+function render(){
+ // Trang mở qua nửa đêm: chuyển sang ngày mới, bỏ các giờ đã chọn của ngày cũ.
+ if(NS.today()!==TODAY){sync();if(S.sel.length){S.sel=[];if(S.step===4||S.step===5){S.step=4;S.err='Đã sang ngày mới ('+dlabel+'). Vui lòng chọn lại giờ.'}}}
+ if(typeof hideBookingTooltip==='function' && typeof bookingTooltip!=='undefined')hideBookingTooltip();$('app').innerHTML=user();const ss=$('store-state');if(ss)ss.textContent=NS.statusText();if(S.step===1)bindCode()}
+function bar(){return '<div class="steps">'+[1,2,3,4,5,6].map(i=>`<i class="${i<=S.step?'on':''}"></i>`).join('')+'</div>'}
+function nav(back,next,label,dis){return `<div class="row">${back?`<button class="btn ghost" onclick="go(${back})">Quay lại</button>`:''}<button class="btn" ${dis?'disabled':''} onclick="${next}">${label}</button></div>`}
+function user(){
+ const s=S.step;let h=s>=7?'':bar();
+ if(s===1)h+=`<div class="card" style="text-align:center;max-width:440px;margin:0 auto"><h2>Nhập mã truy cập</h2><p class="sub">Mã 6 số thay đổi mỗi ngày, có tại quầy Ngói.</p><div class="code">${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" data-i="${i}" aria-label="Số ${i+1}">`).join('')}</div><div class="err" id="err">${S.err}</div><button class="btn" style="width:100%" onclick="checkCode()">Vào trang đặt lịch</button><p class="hint" style="margin-top:12px">Bản demo: mã hôm nay là <b>${NS.todayCode()}</b> (nhân viên xem trong trang Quản lý)</p></div>`;
+ if(s===2)h+=`<h2>Chọn chi nhánh</h2><p class="sub">Ngói có 2 chi nhánh tại Huế.</p>`+BR.map(b=>`<button class="opt ${S.b===b.id?'on':''}" onclick="S.b='${b.id}';S.rs=[];S.sel=[];render()"><div class="ph"></div><div><b>${b.n}</b><span>${b.a} · Mở cửa ${cfgOf(b.id).open}–${cfgOf(b.id).close} · ${branchRooms(b.id).length} phòng</span></div></button>`).join('')+nav(1,'go(3)','Tiếp tục',!S.b);
+ if(s===3)h+=`<h2>Chọn phòng chụp</h2><p class="sub">Mỗi phòng có một phong cách riêng. Bạn có thể chọn nhiều phòng cùng lúc.</p>`+(branchRooms(S.b).length?'':'<div class="card">Chi nhánh tạm thời chưa nhận đặt phòng. Vui lòng chọn chi nhánh khác.</div>')+branchRooms(S.b).map(r=>`<button class="opt ${S.rs.includes(r.id)?'on':''}" aria-pressed="${S.rs.includes(r.id)}" onclick="togR('${r.id}')"><div class="ph"></div><div><b>${esc(r.n)}${hot(r)}</b><span>${esc(r.t)} · ${vnd(r.d)} / slot 10 phút<br>${nBook(S.b,r.id)} lượt đặt trong 30 ngày qua</span></div></button>${peek(r)}`).join('')+nav(2,'go(4)','Tiếp tục',!S.rs.length);
+ if(s===4)h+=`<h2>Chọn khung giờ</h2><p class="sub">${dlabel} · mỗi slot 10 phút, từ ${cfgOf(S.b).open} đến ${cfgOf(S.b).close}. Chọn khoảng giờ rồi bấm vào giờ muốn chụp; giờ đã qua hoặc đã có người đặt sẽ bị gạch.</p>`+slotView()+(S.err?`<div class="err" role="alert" style="margin-top:12px">${S.err}</div>`:'')+nav(3,'go(5)','Tiếp tục',!S.sel.length);
+ if(s===5){const b=by(BR,S.b);
+  h+=`<h2>Xác nhận thông tin</h2><p class="sub">Kiểm tra lại trước khi đặt lịch.</p><div class="card"><dl><dt>Chi nhánh</dt><dd>${b.n} (${b.a})</dd><dt>Ngày</dt><dd>${dlabel}</dd>${sumRows()}</dl></div><div style="margin-top:14px"><input class="f" id="nm" placeholder="Tên của bạn" value="${esc(S.name)}" maxlength="80" autocomplete="name"><input class="f" id="ph" inputmode="tel" placeholder="Số điện thoại" value="${esc(S.phone)}" maxlength="20" autocomplete="tel"><div class="err">${esc(S.err)}</div></div>`+nav(4,'confirmBooking()',S.busy?'Đang giữ chỗ…':'Xác nhận đặt lịch',!!S.busy);}
+ if(s===7)h+=mineView();
+ if(s===8)h+=contactView();
+ if(s===6){const b=by(BR,S.b);h+=`<div class="card" style="text-align:center;max-width:440px;margin:0 auto"><div class="ok">✓</div><h2>Đặt lịch thành công!</h2><p class="sub">Vui lòng đến đúng giờ. Hẹn gặp bạn tại Ngói!</p><div style="margin:0 auto 16px;padding:12px;border:2px dashed var(--brand);border-radius:14px;max-width:320px"><div style="font-size:12.5px;color:var(--muted)">Mã booking (đưa cho nhân viên khi đến)</div><div style="font:700 28px 'Playfair Display',serif;letter-spacing:.08em;color:var(--brand)">${S.code}</div></div><dl style="text-align:left;margin:0 auto 16px;max-width:320px"><dt>Chi nhánh</dt><dd>${b.n}</dd><dt>Ngày</dt><dd>${dlabel}</dd>${sumRows()}</dl><button class="btn" onclick="openMine()">Xem lịch của tôi</button> <button class="btn ghost" onclick="reset()">Đặt thêm lịch</button></div>`}
+ return h}
+function bindCode(){const ins=[...document.querySelectorAll('.code input')];ins.forEach((el,i)=>{el.oninput=()=>{el.value=el.value.replace(/\D/g,'');if(el.value&&ins[i+1])ins[i+1].focus()};el.onkeydown=e=>{if(e.key==='Backspace'&&!el.value&&ins[i-1])ins[i-1].focus();if(e.key==='Enter')checkCode()}});ins[0].focus()}
+function checkCode(){const v=[...document.querySelectorAll('.code input')].map(i=>i.value).join('');if(v===NS.todayCode()){S.unlocked=true;go(2)}else{S.err='Mã chưa đúng. Kiểm tra lại mã 6 số hôm nay.';$('err').textContent=S.err}}
+function confirmBooking(){if(S.busy)return;S.name=$('nm').value.trim();S.phone=$('ph').value.trim();
+ const digits=S.phone.replace(/[\s.\-]/g,'').replace(/^\+/,'');
+ if(!S.name){S.err='Vui lòng nhập tên của bạn.';render();return}
+ if(!/^(?:0\d{9}|84\d{9})$/.test(digits)){S.err='Nhập số điện thoại hợp lệ: 10 số bắt đầu bằng 0 (ví dụ 0912 345 678).';render();return}
+ if(!S.sel.length){S.step=4;S.err='Bạn chưa chọn khung giờ nào (hoặc giờ đã chọn vừa có người đặt). Vui lòng chọn lại.';render();return}
+ const dayBefore=TODAY;
+ sync(); // lấy dữ liệu mới nhất: có thể vừa có người đặt ở tab hoặc quầy khác
+ if(TODAY!==dayBefore){S.sel=[];S.step=4;S.err='Đã sang ngày mới ('+dlabel+'). Vui lòng chọn lại giờ.';render();return}
+ const lost=S.sel.filter(k=>{const[r,t]=k.split('|');return taken(S.b,r,t)||!inHours(by(RM,r),t)});
+ if(lost.length){S.err='Có khung giờ vừa có người đặt hoặc phòng đã đổi giờ. Vui lòng chọn giờ khác.';S.sel=S.sel.filter(k=>!lost.includes(k));S.step=4;render();return}
+ if(S.sel.some(k=>past(k.split('|')[1]))){S.err='Có khung giờ đã qua trong lúc bạn đang đặt. Vui lòng chọn giờ khác.';S.sel=S.sel.filter(k=>!past(k.split('|')[1]));S.step=4;render();return}
+ // Giữ chỗ: chế độ máy chủ dùng giao dịch trên Firebase nên hai máy không thể đặt trùng một khung.
+ const recs=S.sel.map(k=>{const[r,t]=k.split('|');return {b:S.b,r,t,name:S.name,phone:S.phone,st:'booked',source:'online'}});
+ S.busy=true;render();
+ NS.reserve(recs).then(res=>{S.busy=false;
+  if(res.ok){NS.addMine(res.ids);S.code=res.code;sync();go(6);return}
+  sync();
+  if(res.reason==='full'){S.err=STORE_FULL;render();return}
+  if(res.reason==='network'){S.err='Chưa đặt được vì không kết nối được máy chủ. Vui lòng kiểm tra mạng rồi bấm xác nhận lại.';render();return}
+  const keep=S.sel.filter(k=>{const[r,t]=k.split('|');return !taken(S.b,r,t)});S.sel=keep.length<S.sel.length?keep:[];
+  S.err='Có khung giờ vừa có người đặt ở nơi khác. Vui lòng chọn giờ khác.';S.step=4;render()})}
+// Hiển thị trạng thái giờ khi rê chuột hoặc dùng bàn phím.
+const bookingTooltip = document.getElementById('booking-time-tooltip');
+let tooltipTarget = null;
+function hideBookingTooltip(){ bookingTooltip.classList.remove('visible'); bookingTooltip.setAttribute('aria-hidden','true'); tooltipTarget=null; }
+function positionBookingTooltip(el){
+ if(!el || !el.isConnected) return hideBookingTooltip();
+ const r=el.getBoundingClientRect(), w=bookingTooltip.offsetWidth || 75, h=bookingTooltip.offsetHeight || 34;
+ const left=Math.min(Math.max(r.left + r.width/2-w/2, 8), window.innerWidth-w-8);
+ const top=r.top >= h+12 ? r.top-h-8 : Math.min(r.bottom+8, window.innerHeight-h-8);
+ bookingTooltip.style.left=Math.round(left)+'px'; bookingTooltip.style.top=Math.round(top)+'px';
+}
+function showBookingTooltip(el){
+ if(!el || !el.dataset.tip) return hideBookingTooltip();
+ tooltipTarget=el; bookingTooltip.textContent=el.dataset.tip;
+ bookingTooltip.classList.add('visible'); bookingTooltip.setAttribute('aria-hidden','false');
+ positionBookingTooltip(el);
+}
+document.addEventListener('pointerover',e=>{const el=e.target.closest?.('.slot.off[data-tip]');if(el)showBookingTooltip(el);else if(tooltipTarget)hideBookingTooltip()});
+document.addEventListener('pointerout',e=>{if(tooltipTarget && e.target===tooltipTarget)hideBookingTooltip()});
+document.addEventListener('focusin',e=>{const el=e.target.closest?.('.slot.off[data-tip]');if(el)showBookingTooltip(el);else hideBookingTooltip()});
+document.addEventListener('focusout',e=>{if(tooltipTarget && e.target===tooltipTarget)hideBookingTooltip()});
+window.addEventListener('scroll',()=>{if(tooltipTarget)positionBookingTooltip(tooltipTarget)},true);
+window.addEventListener('resize',()=>{if(tooltipTarget)positionBookingTooltip(tooltipTarget)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.step===4)render()});
+NS.onChange(()=>{sync();
+ if(S.b&&!branchRooms(S.b).length&&S.step>=3&&S.step<=5){S.rs=[];S.sel=[]}
+ S.rs=S.rs.filter(id=>branchRooms(S.b).some(r=>r.id===id));
+ const before=S.sel.length;S.sel=S.sel.filter(k=>{const[r,t]=k.split('|');return S.rs.includes(r)&&!taken(S.b,r,t)&&inHours(by(RM,r),t)});
+ const lostSel=S.sel.length<before&&S.step>=4&&S.step<=5;
+ if(lostSel){if(S.step===5&&$('nm')){S.name=$('nm').value;S.phone=$('ph').value}S.err='Một số giờ bạn chọn vừa có người đặt nên đã được bỏ chọn.';S.step=4}
+ // Mất giờ đã chọn thì luôn vẽ lại ngay (kể cả khi đang gõ), để khách không bấm xác nhận trên màn hình cũ.
+ if(lostSel||!document.activeElement?.closest('input,textarea,select'))render()});
+setInterval(()=>{if(S.step===4&&!document.activeElement?.closest('input,textarea,select'))render()},60000);
+render();
+</script><script>
+(function(){
+ var root=document.documentElement,KEY='ngoi_theme_v1';
+ function cur(){return root.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+ try{var saved=localStorage.getItem(KEY);if(saved==='dark'||saved==='light')root.setAttribute('data-theme',saved)}catch(e){}
+ var host=document.querySelector('header .tabs')||document.querySelector('header > div:last-child');
+ if(!host)return;
+ var b=document.createElement('button');b.type='button';b.className='theme-btn';
+ function paint(){var d=cur()==='dark';b.textContent=d?'☀️':'🌙';b.title=d?'Chuyển sang nền sáng':'Chuyển sang nền tối';b.setAttribute('aria-label',b.title)}
+ b.onclick=function(){var n=cur()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem(KEY,n)}catch(e){}paint()};
+ paint();host.appendChild(b);
+})();
+</script></body></html>
