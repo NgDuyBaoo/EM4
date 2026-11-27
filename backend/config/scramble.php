@@ -51,12 +51,12 @@ return [
         /*
          * API version.
          */
-        'version' => env('API_VERSION', '0.0.1'),
+        'version' => env('API_VERSION', '1.0.0'),
 
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => '',
+        'description' => 'API đặt lịch Ngói Photobooth. Đăng nhập qua `POST /api/auth/login` để nhận token Sanctum, gửi kèm header `Authorization: Bearer <token>`. Khách cần gửi mã truy cập 6 số của ngày (header `X-Access-Code` khi xem lịch trống, trường `access_code` khi đặt lịch).',
     ],
 
     'ui' => [
