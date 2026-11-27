@@ -84,8 +84,16 @@ jobs:
         with: { php-version: '8.3', tools: composer:v2, coverage: none }
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env && php artisan key:generate
-      - run: php artisan scramble:analyze
-      - run: php artisan scramble:export --path=openapi.json
+      # Scramble đọc cấu trúc bảng để suy ra kiểu dữ liệu, nên cần một database đã migrate (SQLite cho nhanh)
+      - name: Tạo database SQLite cho Scramble
+        env: { DB_CONNECTION: sqlite, DB_DATABASE: database/ci.sqlite }
+        run: touch database/ci.sqlite && php artisan migrate --force
+      - name: Phân tích API
+        env: { DB_CONNECTION: sqlite, DB_DATABASE: database/ci.sqlite }
+        run: php artisan scramble:analyze
+      - name: Xuất openapi.json
+        env: { DB_CONNECTION: sqlite, DB_DATABASE: database/ci.sqlite }
+        run: php artisan scramble:export --path=openapi.json
       - uses: actions/upload-artifact@v4
         with: { name: openapi, path: backend/openapi.json }
 
