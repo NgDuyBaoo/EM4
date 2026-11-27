@@ -1,0 +1,23 @@
+# deploy
+
+| File | Vai trò |
+|------|---------|
+| `docker/app.Dockerfile` | Image Laravel: cài vendor, build Tailwind/Vite, chạy PHP-FPM + Nginx (serversideup/php) |
+| `docker-compose.yml` | `app` (web), `queue` (gửi email), `scheduler` (tự hủy booking trễ), `pulse` (giám sát máy chủ), `mysql`, `redis` |
+| `.env.example` | Biến môi trường cần điền |
+
+## Chạy
+
+```bash
+cp deploy/.env.example deploy/.env       # điền mật khẩu, APP_KEY
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+docker compose -f deploy/docker-compose.yml exec app php artisan db:seed --force   # lần đầu: dữ liệu danh mục + admin
+```
+
+Container `app` tự chạy migration khi khởi động (`AUTORUN_LARAVEL_MIGRATION`). Đặt sau reverse proxy có HTTPS.
+
+## Giám sát
+- `GET /api/health`: kiểm tra DB, cache, queue (Docker healthcheck dùng endpoint này).
+- `/pulse`: CPU, RAM, ổ đĩa, request chậm, query chậm, job, cache hit rate.
+- `/telescope`: chi tiết từng request, query, job, mail, exception (chỉ chủ cửa hàng).
+- `backend/storage/logs/`: `laravel-*.log`, `booking-*.log`, `slow-query-*.log`.

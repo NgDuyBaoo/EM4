@@ -1,0 +1,17 @@
+**/node_modules
+backend/vendor
+backend/public/build
+backend/public/hot
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/database/*.sqlite
+**/.env
+!**/.env.example
+deploy/.env
+.git
+.github
+docs
+design
+**/*.log

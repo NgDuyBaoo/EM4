@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+*.blade.php diff=html
+*.css       diff=css
+*.php       diff=php
+*.md        diff=markdown
+
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.fig  binary
+*.pdf  binary
+
+backend/composer.lock    linguist-generated=true -diff
+backend/package-lock.json linguist-generated=true -diff
+docs/api/openapi.json    linguist-generated=true
+design/prototypes/*.html linguist-documentation
