@@ -21,4 +21,8 @@
 DB::listen(fn (QueryExecuted $q) => $q->time >= config('ngoi.slow_query_ms') && Log::channel('slow-query')->warning(...));
 DB::whenQueryingForLongerThan(2000, fn ($conn, $event) => Log::channel('slow-query')->error(...));
 ```
-Có thể nối kênh `slow-query` sang Slack bằng driver `slack` của Laravel khi triển khai thật.
+Ngoài ghi log, mỗi lần vượt ngưỡng hệ thống còn **gửi cảnh báo** (`app/Monitoring/SlowQueryAlert.php`, job `SendSlowQueryAlert` chạy qua queue):
+
+- Email tới `NGOI_ALERT_MAIL`, để trống thì gửi cho mọi tài khoản chủ cửa hàng.
+- Slack nếu đặt `NGOI_ALERT_SLACK_WEBHOOK` (Incoming Webhook).
+- Cùng một câu SQL chỉ báo 1 lần trong `NGOI_SLOW_QUERY_ALERT_THROTTLE` phút (mặc định 10) để không gửi dồn dập. Tắt bằng `NGOI_SLOW_QUERY_ALERT=false`.
