@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+/* Quét class Tailwind trong view (frontend) và view phân trang của Laravel (backend/vendor) */
+@source '../views';
+@source '../../../backend/app/Enums';
+@source '../../../backend/vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+/* Design tokens Ngói (design/figma/tokens.json) */
+@theme {
+    --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+
+    --color-ngoi-bg: #F6EFE6;
+    --color-ngoi-surface: #FFFBF6;
+    --color-ngoi-ink: #3B2416;
+    --color-ngoi-muted: #8A6F5C;
+    --color-ngoi-brand: #7A4A2B;
+    --color-ngoi-brand-ink: #FFF8F0;
+    --color-ngoi-line: #E4D6C6;
+    --color-ngoi-sel: #F3DDBB;
+    --color-ngoi-free: #CDE8CB;
+}
+
+@layer components {
+    .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ngoi-brand px-5 py-2.5 font-semibold text-ngoi-brand-ink shadow-md shadow-ngoi-brand/30 transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0; }
+    .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl border-[1.5px] border-ngoi-brand px-5 py-2.5 font-semibold text-ngoi-brand transition hover:bg-ngoi-sel disabled:opacity-40; }
+    .btn-sm { @apply px-3 py-1.5 text-sm; }
+    .btn-danger { @apply bg-rose-700 shadow-rose-700/30; }
+    .card { @apply rounded-2xl border border-ngoi-line bg-ngoi-surface p-5 shadow-[0_10px_30px_-18px_rgba(59,36,22,.45)]; }
+    .field { @apply w-full rounded-lg border-[1.5px] border-ngoi-line bg-ngoi-surface px-3 py-2.5 text-ngoi-ink outline-none focus:border-ngoi-brand focus:ring-4 focus:ring-ngoi-sel; }
+    .label { @apply mb-1 block text-sm text-ngoi-muted; }
+    .error { @apply mt-1 text-sm text-rose-700; }
+    .pill { @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-medium; }
+    .chip { @apply rounded-full border-[1.5px] border-ngoi-line bg-ngoi-surface px-3.5 py-1.5 text-sm font-medium hover:border-ngoi-brand; }
+    .chip-on { @apply border-ngoi-brand bg-ngoi-brand text-ngoi-brand-ink; }
+    .slot { @apply min-h-9 rounded-lg border-[1.5px] border-ngoi-line bg-ngoi-surface px-1 py-1.5 text-sm font-medium hover:border-ngoi-brand hover:bg-ngoi-sel disabled:cursor-not-allowed disabled:bg-ngoi-bg disabled:text-ngoi-muted disabled:line-through disabled:hover:border-ngoi-line; }
+    .slot-on { @apply border-ngoi-brand bg-ngoi-brand text-ngoi-brand-ink hover:bg-ngoi-brand; }
+    .roof { background: radial-gradient(circle at 11px 0, transparent 8px, rgba(255,248,240,.14) 8.5px 9.5px, transparent 10px) 0 0/22px 11px, var(--color-ngoi-brand); }
+    .roof::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 11px; background: radial-gradient(circle at 11px 0, var(--color-ngoi-brand) 10px, transparent 10.5px) 0 0/22px 11px; }
+}
