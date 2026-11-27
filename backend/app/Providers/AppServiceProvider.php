@@ -54,10 +54,8 @@ class AppServiceProvider extends ServiceProvider
     /** Cảnh báo truy vấn chậm: từng câu > NGOI_SLOW_QUERY_MS, hoặc tổng thời gian query của 1 request > 2 giây. */
     private function configureSlowQueryAlerts(): void
     {
-        $threshold = (int) config('ngoi.slow_query_ms');
-
-        DB::listen(function (QueryExecuted $query) use ($threshold) {
-            if ($query->time >= $threshold) {
+        DB::listen(function (QueryExecuted $query) {
+            if ($query->time >= (int) config('ngoi.slow_query_ms')) {
                 Log::channel('slow-query')->warning('Truy vấn chậm', [
                     'ms' => $query->time,
                     'sql' => $query->sql,

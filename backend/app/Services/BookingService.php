@@ -11,12 +11,10 @@ use App\Models\Branch;
 use App\Models\User;
 use App\Support\Phone;
 use App\Support\SlotClock;
-use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class BookingService
 {

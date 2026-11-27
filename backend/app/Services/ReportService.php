@@ -6,9 +6,9 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Room;
+use App\Support\SlotClock;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 /** Thống kê lượt đặt, doanh thu, hiệu suất phòng. Kết quả cache 5 phút. */
 class ReportService
@@ -60,7 +60,7 @@ class ReportService
             ->orderBy('branch_id')->orderBy('sort_order')
             ->get()
             ->map(function (Room $room) use ($dayCount) {
-                $perDay = count(\App\Support\SlotClock::slots($room->branch->openAt(), $room->branch->closeAt()));
+                $perDay = count(SlotClock::slots($room->branch->openAt(), $room->branch->closeAt()));
                 $capacity = $perDay * $dayCount;
 
                 return [
