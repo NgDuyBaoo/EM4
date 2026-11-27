@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Providers;
+
+use App\Models\Booking;
+use App\Models\Branch;
+use App\Models\Room;
+use App\Models\User;
+use App\Observers\BookingObserver;
+use App\Observers\CatalogObserver;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        //
+    }
+
+    public function boot(): void
+    {
+        // Chống antipattern: báo lỗi khi lazy-load (N+1), gán thuộc tính không tồn tại… (chỉ khi dev/test)
+        Model::shouldBeStrict(! $this->app->isProduction());
+
+        Booking::observe(BookingObserver::class);
+        Room::observe(CatalogObserver::class);
+        Branch::observe(CatalogObserver::class);
+
+        $this->configureSlowQueryAlerts();
+        $this->configureRateLimits();
+        $this->configureApiDocs();
+
+        // Prefetch asset Vite để trang tải nhanh hơn
+        Vite::prefetch(concurrency: 3);
+
+        // Telescope, Pulse, tài liệu API: chỉ chủ cửa hàng (ở production)
+        Gate::define('viewPulse', fn (User $user) => $user->isOwner());
+        Gate::define('viewApiDocs', fn (?User $user = null) => ! $this->app->isProduction() || $user?->isOwner());
+    }
+
+    /** Cảnh báo truy vấn chậm: từng câu > NGOI_SLOW_QUERY_MS, hoặc tổng thời gian query của 1 request > 2 giây. */
+    private function configureSlowQueryAlerts(): void
+    {
+        $threshold = (int) config('ngoi.slow_query_ms');
+
+        DB::listen(function (QueryExecuted $query) use ($threshold) {
+            if ($query->time >= $threshold) {
+                Log::channel('slow-query')->warning('Truy vấn chậm', [
+                    'ms' => $query->time,
+                    'sql' => $query->sql,
+                    'bindings' => $query->bindings,
+                    'url' => request()?->fullUrl(),
+                ]);
+            }
+        });
+
+        DB::whenQueryingForLongerThan(2000, function (Connection $connection, QueryExecuted $event) {
+            Log::channel('slow-query')->error('Tổng thời gian truy vấn của request vượt 2 giây', [
+                'connection' => $connection->getName(),
+                'total_ms' => $connection->totalQueryDuration(),
+                'url' => request()?->fullUrl(),
+            ]);
+        });
+    }
+
+    private function configureRateLimits(): void
+    {
+        RateLimiter::for('api', fn (Request $r) => Limit::perMinute(120)->by($r->user()?->id ?: $r->ip()));
+        // Chống dò mã truy cập 6 số / mật khẩu
+        RateLimiter::for('access-code', fn (Request $r) => Limit::perMinutes(10, 20)->by($r->user()?->id ?: $r->ip()));
+        RateLimiter::for('login', fn (Request $r) => Limit::perMinute(10)->by(strtolower((string) $r->input('email')).'|'.$r->ip()));
+    }
+
+    private function configureApiDocs(): void
+    {
+        Scramble::configure()
+            ->withDocumentTransformers(function (OpenApi $openApi) {
+                $openApi->secure(SecurityScheme::http('bearer'));
+            });
+    }
+}
