@@ -1,0 +1,20 @@
+[
+  {
+    "name": "36 Nguyễn Sinh Cung",
+    "address": "36 Nguyễn Sinh Cung, Vỹ Dạ, Huế",
+    "phone": "",
+    "openTime": "08:30",
+    "closeTime": "22:30",
+    "sortOrder": 1,
+    "code": "b1"
+  },
+  {
+    "name": "88 Đinh Tiên Hoàng",
+    "address": "88 Đinh Tiên Hoàng, Phú Xuân, Huế",
+    "phone": "",
+    "openTime": "08:30",
+    "closeTime": "22:30",
+    "sortOrder": 2,
+    "code": "b2"
+  }
+]

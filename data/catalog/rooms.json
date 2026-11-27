@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Phòng 1",
+    "style": "Vintage",
+    "description": "Tông be kem, rèm ren, ánh sáng ấm.",
+    "pricePerSlot": 50000,
+    "sortOrder": 1,
+    "branchCode": "b1"
+  },
+  {
+    "name": "Phòng 2",
+    "style": "Classic",
+    "description": "Phông trắng, xám khói, đen. Hợp chụp profile, kỷ yếu.",
+    "pricePerSlot": 50000,
+    "sortOrder": 2,
+    "branchCode": "b1"
+  },
+  {
+    "name": "Phòng 3",
+    "style": "Film",
+    "description": "Màu film: xanh rêu, đỏ gạch, vàng nắng. Nhiều đạo cụ.",
+    "pricePerSlot": 50000,
+    "sortOrder": 3,
+    "branchCode": "b1"
+  },
+  {
+    "name": "Phòng 1",
+    "style": "Vintage",
+    "description": "Tông be kem, rèm ren, ánh sáng ấm.",
+    "pricePerSlot": 50000,
+    "sortOrder": 1,
+    "branchCode": "b2"
+  },
+  {
+    "name": "Phòng 2",
+    "style": "Classic",
+    "description": "Phông trắng, xám khói, đen.",
+    "pricePerSlot": 50000,
+    "sortOrder": 2,
+    "branchCode": "b2"
+  },
+  {
+    "name": "Phòng 3",
+    "style": "Film",
+    "description": "Màu film, nhiều đạo cụ tạo dáng.",
+    "pricePerSlot": 50000,
+    "sortOrder": 3,
+    "branchCode": "b2"
+  }
+]
