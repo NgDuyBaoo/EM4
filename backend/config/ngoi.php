@@ -23,6 +23,8 @@ return [
         'bank_bin' => env('NGOI_BANK_BIN', '970436'),
         'account' => env('NGOI_BANK_ACCOUNT', '0000000000'),
         'account_name' => env('NGOI_BANK_ACCOUNT_NAME', 'NGOI PHOTOBOOTH'),
+        // API danh sách ngân hàng (tên, logo) để hiện cạnh mã QR
+        'banks_url' => 'https://api.vietqr.io/v2/banks',
     ],
 
     // Dự báo thời tiết Huế từ Open-Meteo (miễn phí, không cần API key).
