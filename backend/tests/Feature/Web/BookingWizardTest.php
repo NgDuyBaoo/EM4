@@ -10,7 +10,13 @@ use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    Http::fake();
+    Http::fake([
+        // API danh sách ngân hàng của VietQR (hiện cạnh mã QR ở bước cuối)
+        'api.vietqr.io/*' => Http::response(['code' => '00', 'desc' => 'ok', 'data' => [
+            ['name' => 'Ngân hàng TMCP Ngoại Thương Việt Nam', 'code' => 'VCB', 'bin' => '970436', 'shortName' => 'Vietcombank', 'logo' => 'https://api.vietqr.io/img/VCB.png'],
+        ]]),
+        '*' => Http::response(),
+    ]);
     freezeAt('10:00');
     [$this->b1] = seedBranches();
     $this->room = $this->b1->rooms->first();
@@ -40,6 +46,21 @@ it('đi hết 6 bước và đặt lịch thành công, gửi email xác nhận'
     $b = Booking::sole();
     expect($b->user_id)->toBe($this->user->id)->and($b->time())->toBe('14:30');
     Notification::assertSentTo($this->user, BookingConfirmed::class);
+});
+
+it('trang đặt thành công hiện ngân hàng nhận tiền lấy từ API VietQR', function () {
+    Notification::fake();
+    config(['ngoi.vietqr.bank_bin' => '970436', 'ngoi.vietqr.account' => '0123456789']);
+
+    Livewire::test(BookingWizard::class)
+        ->set('code', todayCode())->call('verifyCode')
+        ->call('chooseBranch', $this->b1->id)->call('go', 3)
+        ->call('toggleRoom', $this->room->id)->call('go', 4)
+        ->call('toggleSlot', $this->room->id, '14:30')->call('go', 5)
+        ->set('phone', '0912345678')->call('confirm')
+        ->assertSet('step', 6)
+        ->assertSee('Vietcombank · 0123456789')
+        ->assertSee('https://api.vietqr.io/img/VCB.png', false);
 });
 
 it('nhớ mã đã nhập trong phiên: lần sau bắt đầu từ bước 2', function () {

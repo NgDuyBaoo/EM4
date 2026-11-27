@@ -177,6 +177,17 @@
             @if ($qr)
                 <p class="text-sm text-ngoi-muted">Muốn trả trước? Quét mã VietQR (nội dung chuyển khoản là mã booking):</p>
                 <img src="{{ $qr }}" alt="Mã QR chuyển khoản {{ $resultCode }}" loading="lazy" width="220" height="250" class="mx-auto my-2 rounded-lg">
+                @if ($bank)
+                    <div class="mx-auto mb-2 flex max-w-xs items-center gap-3 rounded-lg border border-ngoi-line px-3 py-2 text-left text-sm">
+                        @if ($bank['logo'])
+                            <img src="{{ $bank['logo'] }}" alt="{{ $bank['short_name'] }}" loading="lazy" width="64" height="24" class="h-6 w-16 object-contain">
+                        @endif
+                        <div>
+                            <p class="font-semibold">{{ $bank['short_name'] }} · {{ $bank['account'] }}</p>
+                            <p class="text-xs text-ngoi-muted">{{ $bank['account_name'] }}</p>
+                        </div>
+                    </div>
+                @endif
             @endif
             <p class="text-xs text-ngoi-muted">Email xác nhận đã được gửi tới {{ auth()->user()->email }}.</p>
             <div class="mt-4 flex justify-center gap-3">

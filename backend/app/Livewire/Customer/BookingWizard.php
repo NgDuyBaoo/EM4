@@ -6,6 +6,7 @@ use App\Exceptions\BookingException;
 use App\Models\Branch;
 use App\Services\AccessCodeService;
 use App\Services\AvailabilityService;
+use App\Services\BankDirectory;
 use App\Services\BookingService;
 use App\Services\VietQr;
 use App\Services\WeatherService;
@@ -224,6 +225,7 @@ class BookingWizard extends Component
         return view('livewire.customer.booking-wizard', [
             'weather' => $this->step === 4 ? app(WeatherService::class)->today() : null,
             'qr' => $this->resultCode ? VietQr::imageUrl(array_sum(array_column($this->lines, 'price')), $this->resultCode) : null,
+            'bank' => $this->resultCode ? app(BankDirectory::class)->shopAccount() : null,
             'today' => SlotClock::today(),
         ]);
     }
