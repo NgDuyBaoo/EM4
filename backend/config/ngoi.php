@@ -10,6 +10,13 @@ return [
     'no_show_grace_minutes' => (int) env('NGOI_NO_SHOW_GRACE_MINUTES', 15),
     // Truy vấn chậm hơn ngưỡng này (ms) sẽ được ghi vào log "slow-query".
     'slow_query_ms' => (int) env('NGOI_SLOW_QUERY_MS', 500),
+    // Gửi cảnh báo truy vấn chậm cho chủ tiệm (email; Slack nếu có webhook). Cùng 1 câu SQL chỉ báo 1 lần / throttle_minutes.
+    'slow_query_alert' => [
+        'enabled' => (bool) env('NGOI_SLOW_QUERY_ALERT', true),
+        'mail_to' => env('NGOI_ALERT_MAIL'),           // trống: gửi cho mọi tài khoản chủ cửa hàng
+        'slack_webhook' => env('NGOI_ALERT_SLACK_WEBHOOK'),
+        'throttle_minutes' => (int) env('NGOI_SLOW_QUERY_ALERT_THROTTLE', 10),
+    ],
 
     // Mã QR chuyển khoản qua VietQR (https://www.vietqr.io).
     'vietqr' => [

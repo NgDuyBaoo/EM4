@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Room;
 use App\Models\User;
+use App\Monitoring\SlowQueryAlert;
 use App\Observers\BookingObserver;
 use App\Observers\CatalogObserver;
 use Dedoc\Scramble\Scramble;
@@ -51,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewApiDocs', fn (?User $user = null) => ! $this->app->isProduction() || $user?->isOwner());
     }
 
-    /** Cảnh báo truy vấn chậm: từng câu > NGOI_SLOW_QUERY_MS, hoặc tổng thời gian query của 1 request > 2 giây. */
+    /** Cảnh báo truy vấn chậm: từng câu > NGOI_SLOW_QUERY_MS, hoặc tổng thời gian query của 1 request > 2 giây. Ghi log và báo cho chủ tiệm. */
     private function configureSlowQueryAlerts(): void
     {
         DB::listen(function (QueryExecuted $query) {
@@ -62,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
                     'bindings' => $query->bindings,
                     'url' => request()?->fullUrl(),
                 ]);
+                SlowQueryAlert::report('query', $query->sql, $query->time, request()?->fullUrl());
             }
         });
 
@@ -71,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
                 'total_ms' => $connection->totalQueryDuration(),
                 'url' => request()?->fullUrl(),
             ]);
+            SlowQueryAlert::report('request', $event->sql, $connection->totalQueryDuration(), request()?->fullUrl());
         });
     }
 
