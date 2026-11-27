@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Booking;
 use App\Models\Room;
 use Laravel\Sanctum\Sanctum;
 
@@ -7,12 +8,12 @@ beforeEach(fn () => [$this->b1, $this->b2] = seedBranches());
 
 it('liệt kê chi nhánh kèm phòng đang hoạt động (không N+1)', function () {
     Room::factory()->for($this->b1)->inactive()->create();
-    \DB::enableQueryLog();
+    DB::enableQueryLog();
     $this->getJson('/api/branches')->assertOk()
         ->assertJsonCount(2, 'data')
         ->assertJsonPath('data.0.rooms_count', 3)
         ->assertJsonCount(3, 'data.0.rooms');
-    expect(count(\DB::getQueryLog()))->toBeLessThanOrEqual(3);
+    expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(3);
 });
 
 it('chủ cửa hàng CRUD phòng đầy đủ', function () {
@@ -48,6 +49,6 @@ it('chủ cửa hàng CRUD chi nhánh, không xóa được chi nhánh đã có 
     $this->putJson("/api/branches/{$id}", ['name' => 'Chi nhánh mới'])->assertOk()->assertJsonPath('data.name', 'Chi nhánh mới');
     $this->deleteJson("/api/branches/{$id}")->assertNoContent();
 
-    \App\Models\Booking::factory()->for($this->b1->rooms->first())->create(['branch_id' => $this->b1->id]);
+    Booking::factory()->for($this->b1->rooms->first())->create(['branch_id' => $this->b1->id]);
     $this->deleteJson("/api/branches/{$this->b1->id}")->assertConflict();
 });

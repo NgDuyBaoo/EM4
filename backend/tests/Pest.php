@@ -3,6 +3,7 @@
 use App\Models\Branch;
 use App\Models\Room;
 use App\Models\User;
+use App\Services\AccessCodeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -51,5 +52,5 @@ function customer(): User
 
 function todayCode(): string
 {
-    return app(\App\Services\AccessCodeService::class)->today()->code;
+    return app(AccessCodeService::class)->today()->code;
 }

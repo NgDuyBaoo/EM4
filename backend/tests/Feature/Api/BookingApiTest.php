@@ -3,6 +3,8 @@
 use App\Enums\BookingStatus;
 use App\Jobs\SendBookingConfirmation;
 use App\Models\Booking;
+use App\Support\SlotClock;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 
@@ -65,7 +67,7 @@ it('chặn đặt trùng slot, slot đã hủy được đặt lại (BR-06)', f
 it('database chặn trùng kể cả khi bỏ qua kiểm tra ở tầng ứng dụng', function () {
     Booking::factory()->for($this->room)->at('15:00')->create(['branch_id' => $this->b1->id]);
     expect(fn () => Booking::factory()->for($this->room)->at('15:00')->create(['branch_id' => $this->b1->id]))
-        ->toThrow(\Illuminate\Database\UniqueConstraintViolationException::class);
+        ->toThrow(UniqueConstraintViolationException::class);
 });
 
 it('từ chối giờ lệch lưới, giờ đã qua, phòng chi nhánh khác, quá số slot', function () {
@@ -74,7 +76,7 @@ it('từ chối giờ lệch lưới, giờ đã qua, phòng chi nhánh khác, q
     $this->postJson('/api/bookings', book(['items' => [['room_id' => $this->room->id, 'time' => '14:35']]]))->assertUnprocessable()->assertJsonPath('code', 'INVALID_SLOT');
     $this->postJson('/api/bookings', book(['items' => [['room_id' => $this->room->id, 'time' => '09:00']]]))->assertConflict()->assertJsonPath('code', 'SLOT_PAST');
     $this->postJson('/api/bookings', book(['items' => [['room_id' => $other->id, 'time' => '16:00']]]))->assertUnprocessable()->assertJsonPath('code', 'INVALID_ROOM');
-    $many = collect(range(0, 12))->map(fn ($i) => ['room_id' => $this->room->id, 'time' => \App\Support\SlotClock::time(16 * 60 + $i * 10)])->all();
+    $many = collect(range(0, 12))->map(fn ($i) => ['room_id' => $this->room->id, 'time' => SlotClock::time(16 * 60 + $i * 10)])->all();
     $this->postJson('/api/bookings', book(['items' => $many]))->assertUnprocessable()->assertJsonValidationErrors('items');
     $this->postJson('/api/bookings', book(['customer_phone' => '123']))->assertUnprocessable()->assertJsonValidationErrors('customer_phone');
 });
@@ -122,14 +124,14 @@ it('khách chỉ xem và hủy booking của mình, trước giờ chụp', func
 });
 
 it('nhân viên lọc booking theo trạng thái, tìm kiếm, phân trang; không N+1', function () {
-    Booking::factory()->count(15)->sequence(fn ($s) => ['slot_time' => \App\Support\SlotClock::time(11 * 60 + $s->index * 10).':00'])
+    Booking::factory()->count(15)->sequence(fn ($s) => ['slot_time' => SlotClock::time(11 * 60 + $s->index * 10).':00'])
         ->for($this->room)->create(['branch_id' => $this->b1->id]);
     Booking::factory()->for($this->room)->at('18:00')->status(BookingStatus::Cancelled)->create(['branch_id' => $this->b1->id, 'customer_name' => 'Khách Zeta']);
     Sanctum::actingAs(staff(), ['staff']);
 
-    \DB::enableQueryLog();
+    DB::enableQueryLog();
     $this->getJson('/api/bookings?per_page=10')->assertOk()->assertJsonCount(10, 'data')->assertJsonPath('meta.total', 16);
-    expect(count(\DB::getQueryLog()))->toBeLessThanOrEqual(6);
+    expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(6);
     $this->getJson('/api/bookings?status=cancelled')->assertJsonCount(1, 'data');
     $this->getJson('/api/bookings?q=Zeta')->assertJsonCount(1, 'data');
 });

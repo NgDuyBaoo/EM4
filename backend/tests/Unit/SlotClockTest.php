@@ -3,6 +3,7 @@
 use App\Enums\BookingStatus;
 use App\Support\Phone;
 use App\Support\SlotClock;
+use Illuminate\Support\Carbon;
 
 it('tạo 84 slot 10 phút từ 08:30 đến 22:30', function () {
     $slots = SlotClock::slots('08:30', '22:30');
@@ -20,7 +21,7 @@ it('chỉ chấp nhận giờ nằm đúng lưới slot', function (string $time
 ]);
 
 it('tính slot đã bắt đầu / đã kết thúc theo giờ Việt Nam', function () {
-    $this->travelTo(\Illuminate\Support\Carbon::parse('2026-10-16 07:35:00', 'UTC')); // 14:35 giờ VN
+    $this->travelTo(Carbon::parse('2026-10-16 07:35:00', 'UTC')); // 14:35 giờ VN
     expect(SlotClock::today())->toBe('2026-10-16')
         ->and(SlotClock::started('14:30'))->toBeTrue()
         ->and(SlotClock::ended('14:30'))->toBeFalse()
@@ -30,7 +31,7 @@ it('tính slot đã bắt đầu / đã kết thúc theo giờ Việt Nam', func
 });
 
 it('qua nửa đêm giờ VN là sang ngày mới dù UTC vẫn là hôm trước', function () {
-    $this->travelTo(\Illuminate\Support\Carbon::parse('2026-10-15 17:30:00', 'UTC'));
+    $this->travelTo(Carbon::parse('2026-10-15 17:30:00', 'UTC'));
     expect(SlotClock::today())->toBe('2026-10-16');
 });
 
