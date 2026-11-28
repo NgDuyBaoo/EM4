@@ -3,7 +3,7 @@
 | File | Vai trò |
 |------|---------|
 | `docker/app.Dockerfile` | Image Laravel: cài vendor, build Tailwind/Vite, chạy PHP-FPM + Nginx (serversideup/php) |
-| `docker-compose.yml` | `app` (web), `queue` (gửi email), `scheduler` (tự hủy booking trễ), `pulse` (giám sát máy chủ), `mysql`, `redis` |
+| `docker-compose.yml` | `app` (web), `queue` (gửi tin Zalo cho khách, cảnh báo cho chủ tiệm), `scheduler` (tự hủy booking trễ, nhắc giờ chụp), `pulse` (giám sát máy chủ), `mysql`, `redis` |
 | `.env.example` | Biến môi trường cần điền |
 
 ## Chạy

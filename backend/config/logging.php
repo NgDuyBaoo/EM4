@@ -53,6 +53,14 @@ return [
     'channels' => [
 
         // Nhật ký nghiệp vụ: tạo booking, đổi trạng thái, từ chối đặt trùng…
+        'zalo' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/zalo.log'),
+            'level' => 'info',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
         'booking' => [
             'driver' => 'daily',
             'path' => storage_path('logs/booking.log'),

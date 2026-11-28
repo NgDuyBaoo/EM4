@@ -43,4 +43,22 @@ return [
         'generate_url' => 'https://api.vietqr.io/v2/generate',
     ],
 
+    // Zalo ZNS: gửi tin xác nhận / nhắc / hủy lịch tới SĐT khách qua Official Account của tiệm.
+    // Các bước lấy khóa và đăng ký mẫu tin: docs/integrations/zalo-zns.md
+    'zalo' => [
+        'driver' => env('ZALO_DRIVER', 'log'), // log | zns
+        'mode' => env('ZALO_ZNS_MODE'), // để trống khi app đã duyệt; "development" khi chỉ gửi thử tới quản trị viên
+        'app_id' => env('ZALO_APP_ID'),
+        'secret_key' => env('ZALO_SECRET_KEY'),
+        'access_token' => env('ZALO_ACCESS_TOKEN'),
+        'refresh_token' => env('ZALO_REFRESH_TOKEN'),
+        'templates' => [
+            'confirmed' => env('ZALO_TEMPLATE_CONFIRMED'),
+            'reminder' => env('ZALO_TEMPLATE_REMINDER'),
+            'cancelled' => env('ZALO_TEMPLATE_CANCELLED'),
+        ],
+        'send_url' => 'https://business.openapi.zalo.me/message/template',
+        'token_url' => 'https://oauth.zaloapp.com/v4/oa/access_token',
+    ],
+
 ];

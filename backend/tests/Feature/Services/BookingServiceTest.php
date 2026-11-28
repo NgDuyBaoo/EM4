@@ -3,7 +3,7 @@
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
 use App\Exceptions\BookingException;
-use App\Jobs\SendBookingConfirmation;
+use App\Jobs\SendBookingZalo;
 use App\Models\Booking;
 use App\Services\BookingService;
 use Illuminate\Support\Facades\Queue;
@@ -27,7 +27,7 @@ function bookingError(callable $fn): ?string
     return null;
 }
 
-it('tạo nhiều slot chung một mã booking và đẩy job gửi mail vào queue', function () {
+it('tạo nhiều slot chung một mã booking và đẩy job gửi tin Zalo xác nhận vào queue', function () {
     Queue::fake();
     $user = customer();
 
@@ -41,7 +41,7 @@ it('tạo nhiều slot chung một mã booking và đẩy job gửi mail vào qu
         ->and($bookings->first()->booking_code)->toMatch('/^NG[A-Z2-9]{6}$/')
         ->and($bookings->first()->customer_phone)->toBe('0912345678')
         ->and($bookings->first()->price)->toBe($this->room->price_per_slot);
-    Queue::assertPushed(SendBookingConfirmation::class, fn ($job) => $job->userId === $user->id);
+    Queue::assertPushed(SendBookingZalo::class, fn ($job) => $job->kind === 'confirmed' && $job->bookingIds === $bookings->pluck('id')->all());
 });
 
 it('từ chối dữ liệu sai trước khi ghi vào database', function (array $times, string $phone, string $code) {

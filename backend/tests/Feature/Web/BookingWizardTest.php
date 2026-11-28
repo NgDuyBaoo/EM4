@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-it('đi hết 6 bước và đặt lịch thành công, gửi email xác nhận', function () {
+it('đi hết 6 bước và đặt lịch thành công, gửi tin Zalo xác nhận', function () {
     Notification::fake();
     Livewire::test(BookingWizard::class)
         ->assertSet('step', 1)
@@ -45,7 +45,7 @@ it('đi hết 6 bước và đặt lịch thành công, gửi email xác nhận'
 
     $b = Booking::sole();
     expect($b->user_id)->toBe($this->user->id)->and($b->time())->toBe('14:30');
-    Notification::assertSentTo($this->user, BookingConfirmed::class);
+    Notification::assertSentOnDemand(BookingConfirmed::class, fn ($n, $channels, $notifiable) => $notifiable->routes['zalo'] === '0912345678');
 });
 
 it('trang đặt thành công hiện ngân hàng nhận tiền lấy từ API VietQR', function () {

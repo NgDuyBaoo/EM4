@@ -34,7 +34,7 @@ flowchart LR
 3. Khách đến → tìm theo mã booking → **Check-in**. Chụp xong → **Hoàn thành**.
 4. Khách trễ quá giờ hẹn → **Hủy vì trễ giờ** để nhường slot.
 5. **Cuối ngày** Xem Thống kê hôm nay, xuất CSV nếu cần đối soát.
-6. **Tự động** Mỗi 5 phút hệ thống hủy booking quá 15 phút chưa check-in; email xác nhận gửi qua hàng đợi.
+6. **Tự động** Mỗi 5 phút hệ thống hủy booking quá 15 phút chưa check-in; tin Zalo xác nhận, báo hủy và nhắc giờ chụp gửi khách qua hàng đợi (không dùng email).
 7. **00:00** Hệ thống tự dùng mã mới cho ngày hôm sau.
 
 ---

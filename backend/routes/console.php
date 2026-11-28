@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Schedule;
 // BR-07: mỗi 5 phút hủy booking quá giờ hẹn mà khách chưa đến
 Schedule::command('bookings:cancel-no-shows')->everyFiveMinutes()->withoutOverlapping();
 
+// Nhắc khách qua Zalo trước giờ chụp NGOI_REMINDER_MINUTES phút
+Schedule::command('bookings:send-reminders')->everyMinute()->withoutOverlapping();
+
 // Gọi thật API ngoài mỗi sáng, ghi kết quả vào storage/logs/integrations-*.log
 Schedule::command('ngoi:check-integrations')->dailyAt('07:00');
 

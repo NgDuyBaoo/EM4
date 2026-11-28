@@ -30,3 +30,7 @@ Job: https://github.com/NgDuyBaoo/NgoiBooking/actions/runs/46096023184/job/14082
 | VietQR `POST /v2/generate` | Tạo QR chuyển khoản qua API chính thức | Header `x-client-id`, `x-api-key` (`VIETQR_CLIENT_ID`, `VIETQR_API_KEY`) | `app/Services/VietQr.php` |
 
 Để kiểm cả API có khóa trên CI: đăng ký miễn phí tại https://my.vietqr.io, rồi thêm 2 secret `VIETQR_CLIENT_ID` và `VIETQR_API_KEY` trong *Settings → Secrets and variables → Actions* của repo.
+
+## Zalo ZNS (thông báo khách)
+
+Tin xác nhận, nhắc giờ chụp và báo hủy lịch gửi khách qua Zalo ZNS, thay cho email. Cần OA và mẫu tin của tiệm nên không chạy trong `ngoi:check-integrations`; test dùng `Http::fake`. Cài đặt và các việc phải tự làm: [zalo-zns.md](zalo-zns.md).

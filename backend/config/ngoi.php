@@ -8,6 +8,8 @@ return [
     'max_slots_per_booking' => 12,
     // Quá giờ hẹn bao nhiêu phút mà chưa check-in thì hệ thống tự hủy (BR-07).
     'no_show_grace_minutes' => (int) env('NGOI_NO_SHOW_GRACE_MINUTES', 15),
+    // Gửi tin Zalo nhắc khách trước giờ chụp bao nhiêu phút (0 = tắt). Xem docs/integrations/zalo-zns.md.
+    'reminder_minutes' => (int) env('NGOI_REMINDER_MINUTES', 30),
     // Truy vấn chậm hơn ngưỡng này (ms) sẽ được ghi vào log "slow-query".
     'slow_query_ms' => (int) env('NGOI_SLOW_QUERY_MS', 500),
     // Nơi nhận cảnh báo (truy vấn chậm, lỗi 5xx, server quá tải). mail_to trống: gửi cho mọi tài khoản chủ cửa hàng.
