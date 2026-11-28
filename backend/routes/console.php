@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Schedule;
 // BR-07: mỗi 5 phút hủy booking quá giờ hẹn mà khách chưa đến
 Schedule::command('bookings:cancel-no-shows')->everyFiveMinutes()->withoutOverlapping();
 
+// Gọi thật API ngoài mỗi sáng, ghi kết quả vào storage/logs/integrations-*.log
+Schedule::command('ngoi:check-integrations')->dailyAt('07:00');
+
 // Dọn dữ liệu giám sát cũ
 Schedule::command('telescope:prune --hours=72')->daily();
 Schedule::command('sanctum:prune-expired --hours=24')->daily();

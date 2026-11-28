@@ -62,6 +62,14 @@ return [
         ],
 
         // Cảnh báo truy vấn chậm (AppServiceProvider::configureSlowQueryAlerts)
+        // Kết quả gọi thật API ngoài (lệnh ngoi:check-integrations, chạy hằng ngày)
+        'integrations' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/integrations.log'),
+            'level' => 'info',
+            'days' => 30,
+        ],
+
         'slow-query' => [
             'driver' => 'daily',
             'path' => storage_path('logs/slow-query.log'),
