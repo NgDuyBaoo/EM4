@@ -101,8 +101,10 @@ class BookingController extends Controller
     public function update(UpdateBookingRequest $request, Booking $booking): BookingResource
     {
         $user = $request->user();
+        // Nhân viên phải vừa có vai trò staff vừa dùng token có quyền 'staff' (giống khi đặt tại quầy).
+        $staff = $user->isStaff() && $user->tokenCan('staff');
         if ($action = $request->input('action')) {
-            $booking = $user->isStaff()
+            $booking = $staff
                 ? $this->bookings->transition($booking, match ($action) {
                     'checkin' => BookingStatus::CheckedIn,
                     'complete' => BookingStatus::Completed,
@@ -110,7 +112,7 @@ class BookingController extends Controller
                 }, (string) $request->input('reason', ''))
                 : $this->bookings->customerCancel($booking);
         }
-        if ($user->isStaff()) {
+        if ($staff) {
             $data = $request->safe()->only(['customer_name', 'customer_phone', 'note']);
             if (isset($data['customer_phone'])) {
                 $data['customer_phone'] = Phone::normalize($data['customer_phone']) ?? $booking->customer_phone;
