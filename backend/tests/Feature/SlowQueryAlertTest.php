@@ -61,8 +61,8 @@ it('gửi tới email cấu hình riêng và Slack webhook nếu có', function 
     Notification::fake();
     Http::fake(['hooks.slack.com/*' => Http::response('ok')]);
     config([
-        'ngoi.slow_query_alert.mail_to' => 'ops@ngoi.vn',
-        'ngoi.slow_query_alert.slack_webhook' => 'https://hooks.slack.com/services/T/B/X',
+        'ngoi.alerts.mail_to' => 'ops@ngoi.vn',
+        'ngoi.alerts.slack_webhook' => 'https://hooks.slack.com/services/T/B/X',
     ]);
 
     (new SendSlowQueryAlert('request', 'select * from rooms', 2300, 'http://ngoi.test/'))->handle();
@@ -75,7 +75,7 @@ it('gửi tới email cấu hình riêng và Slack webhook nếu có', function 
 it('Slack lỗi thì vẫn gửi được email, không làm hỏng job', function () {
     Notification::fake();
     Http::fake(['*' => Http::response('lỗi', 500)]);
-    config(['ngoi.slow_query_alert.slack_webhook' => 'https://hooks.slack.com/services/T/B/X']);
+    config(['ngoi.alerts.slack_webhook' => 'https://hooks.slack.com/services/T/B/X']);
     $owner = owner();
 
     (new SendSlowQueryAlert('query', 'select 1', 600))->handle();
