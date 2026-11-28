@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
 use App\Exceptions\BookingException;
+use App\Livewire\Concerns\RequiresStaff;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Services\AccessCodeService;
@@ -22,6 +23,8 @@ use Livewire\Component;
 #[Title('Lịch phòng – Quản lý Ngói')]
 class Schedule extends Component
 {
+    use RequiresStaff;
+
     #[Url]
     public ?int $branchId = null;
 
@@ -92,6 +95,7 @@ class Schedule extends Component
 
     public function act(int $id, string $action, BookingService $service): void
     {
+        $this->ensureStaff();
         $to = match ($action) {
             'checkin' => BookingStatus::CheckedIn,
             'complete' => BookingStatus::Completed,
@@ -110,6 +114,7 @@ class Schedule extends Component
 
     public function openWalkin(int $roomId, string $time): void
     {
+        $this->ensureStaff();
         $this->walkin = ['room_id' => $roomId, 'time' => $time];
         $this->reset(['walkName', 'walkPhone']);
         $this->resetValidation();
@@ -117,6 +122,7 @@ class Schedule extends Component
 
     public function saveWalkin(BookingService $service): void
     {
+        $this->ensureStaff();
         $this->validate([
             'walkName' => 'required|string|max:80',
             'walkPhone' => ['required', 'regex:/^(\+?84|0)[\d\s.\-]{9,12}$/'],

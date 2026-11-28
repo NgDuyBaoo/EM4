@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\RequiresStaff;
 use App\Services\AccessCodeService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -13,6 +14,8 @@ use Livewire\Component;
 #[Title('Cài đặt – Quản lý Ngói')]
 class Settings extends Component
 {
+    use RequiresStaff;
+
     public bool $confirmRegen = false;
 
     public string $currentPassword = '';
@@ -25,6 +28,7 @@ class Settings extends Component
 
     public function regenerate(AccessCodeService $codes): void
     {
+        $this->ensureStaff();
         $codes->regenerate(auth()->id());
         $this->confirmRegen = false;
         $this->flash = 'Đã tạo mã truy cập mới cho hôm nay.';

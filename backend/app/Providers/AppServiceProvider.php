@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureStaff;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Room;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,6 +46,9 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimits();
         $this->configureApiDocs();
 
+        // Mọi request cập nhật component Livewire (gọi action) đều chạy lại middleware kiểm quyền của trang
+        Livewire::addPersistentMiddleware([EnsureStaff::class]);
+
         // Prefetch asset Vite để trang tải nhanh hơn
         Vite::prefetch(concurrency: 3);
 
@@ -60,7 +65,8 @@ class AppServiceProvider extends ServiceProvider
                 Log::channel('slow-query')->warning('Truy vấn chậm', [
                     'ms' => $query->time,
                     'sql' => $query->sql,
-                    'bindings' => $query->bindings,
+                    // Không ghi bindings: có thể chứa tên, số điện thoại, email khách. Câu SQL giữ dấu ? là đủ để tra.
+                    'bindings_count' => count($query->bindings),
                     'url' => request()?->fullUrl(),
                 ]);
                 SlowQueryAlert::report('query', $query->sql, $query->time, request()?->fullUrl());
