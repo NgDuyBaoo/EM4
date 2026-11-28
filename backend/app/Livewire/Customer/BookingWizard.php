@@ -224,7 +224,7 @@ class BookingWizard extends Component
     {
         return view('livewire.customer.booking-wizard', [
             'weather' => $this->step === 4 ? app(WeatherService::class)->today() : null,
-            'qr' => $this->resultCode ? VietQr::imageUrl(array_sum(array_column($this->lines, 'price')), $this->resultCode) : null,
+            'qr' => $this->resultCode ? VietQr::src(array_sum(array_column($this->lines, 'price')), $this->resultCode) : null,
             'bank' => $this->resultCode ? app(BankDirectory::class)->shopAccount() : null,
             'today' => SlotClock::today(),
         ]);
