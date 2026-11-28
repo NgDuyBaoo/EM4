@@ -20,6 +20,17 @@ return [
         'enabled' => (bool) env('NGOI_SLOW_QUERY_ALERT', true),
         'throttle_minutes' => (int) env('NGOI_SLOW_QUERY_ALERT_THROTTLE', 10),
     ],
+    // Cảnh báo máy chủ theo ngưỡng (%), kiểm mỗi phút trong pulse:check. Cùng 1 chỉ số chỉ báo 1 lần / throttle_minutes.
+    'server_alert' => [
+        'enabled' => (bool) env('NGOI_SERVER_ALERT', true),
+        'thresholds' => [
+            'cpu' => (float) env('NGOI_ALERT_CPU_PERCENT', 85),
+            'memory' => (float) env('NGOI_ALERT_MEMORY_PERCENT', 90),
+            'disk' => (float) env('NGOI_ALERT_DISK_PERCENT', 90),
+        ],
+        'disk_directory' => env('NGOI_ALERT_DISK_DIRECTORY', '/'),
+        'throttle_minutes' => (int) env('NGOI_SERVER_ALERT_THROTTLE', 30),
+    ],
     // Cảnh báo lỗi nghiêm trọng (exception không xử lý, HTTP 5xx). Cùng 1 lỗi chỉ báo 1 lần / throttle_minutes.
     'error_alert' => [
         'enabled' => (bool) env('NGOI_ERROR_ALERT', true),
