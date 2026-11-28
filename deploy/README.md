@@ -14,6 +14,8 @@ docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
 docker compose -f deploy/docker-compose.yml exec -e SEED_ADMIN_PASSWORD="mật-khẩu-mạnh" app php artisan db:seed --force   # lần đầu: danh mục + tài khoản chủ cửa hàng (bắt buộc đặt mật khẩu)
 ```
 
+Muốn có booking và lời nhắn mẫu để chạy thử, chụp ảnh demo (Pulse, báo cáo): thêm `-e SEED_DEMO_DATA=true` vào lệnh seed trên. Seeder không dùng Faker nên chạy được trong image production.
+
 Container `app` tự chạy migration khi khởi động (`AUTORUN_LARAVEL_MIGRATION`). Đặt sau reverse proxy có HTTPS.
 
 ## Giám sát
