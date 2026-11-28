@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -35,8 +36,10 @@ class SystemController extends Controller
             $checks['database'] = ['ok' => false, 'error' => class_basename($e)];
         }
         try {
-            Cache::put('health:ping', 1, 10);
-            $checks['cache'] = ['ok' => Cache::get('health:ping') === 1];
+            // Dùng chuỗi ngẫu nhiên: Redis trả số dưới dạng chuỗi ("1"), so sánh với số 1 sẽ luôn sai.
+            $token = Str::random(16);
+            Cache::put('health:ping', $token, 10);
+            $checks['cache'] = ['ok' => Cache::get('health:ping') === $token];
         } catch (Throwable $e) {
             $checks['cache'] = ['ok' => false, 'error' => class_basename($e)];
         }
