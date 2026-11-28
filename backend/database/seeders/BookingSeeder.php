@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 /**
  * Booking mẫu cho 30 ngày qua (để có số liệu thống kê) và hôm nay (để thấy lưới lịch).
  * Không tạo trùng slot nhờ đánh dấu các slot đã dùng.
+ * Không dùng Faker (gói dev) để chạy được cả trong image Docker production.
  */
 class BookingSeeder extends Seeder
 {
@@ -31,13 +32,13 @@ class BookingSeeder extends Seeder
         for ($d = 30; $d >= 0; $d--) {
             $date = now()->subDays($d)->toDateString();
             foreach ($rooms as $room) {
-                $picked = collect($slots)->random(fake()->numberBetween(6, 22));
+                $picked = collect($slots)->random(min(count($slots), random_int(6, 22)));
                 foreach ($picked as $time) {
                     $isPast = $d > 0 || SlotClock::minutes($time) + 10 <= $now;
                     $status = $isPast
-                        ? fake()->randomElement([BookingStatus::Completed, BookingStatus::Completed, BookingStatus::Completed, BookingStatus::Completed, BookingStatus::Cancelled])
+                        ? (DemoData::chance(80) ? BookingStatus::Completed : BookingStatus::Cancelled)
                         : BookingStatus::Booked;
-                    $customer = fake()->boolean(70) ? $customers->random() : null;
+                    $customer = $customers->isNotEmpty() && DemoData::chance(70) ? $customers->random() : null;
                     $rows[] = [
                         'booking_code' => 'NG'.strtoupper(Str::random(6)),
                         'user_id' => $customer?->id,
@@ -45,8 +46,8 @@ class BookingSeeder extends Seeder
                         'room_id' => $room->id,
                         'booking_date' => $date,
                         'slot_time' => $time.':00',
-                        'customer_name' => $customer?->name ?? fake()->name(),
-                        'customer_phone' => $customer?->phone ?? '09'.fake()->numerify('########'),
+                        'customer_name' => $customer?->name ?? DemoData::name(),
+                        'customer_phone' => $customer?->phone ?? DemoData::phone(),
                         'source' => $customer ? BookingSource::Online->value : BookingSource::Walkin->value,
                         'status' => $status->value,
                         'price' => $room->price_per_slot,
