@@ -40,3 +40,13 @@ khởi động container chạy `config:cache`, `route:cache`, `view:cache`, `ev
 | Gọi API ngoài không giới hạn | `timeout(4)`, `retry(2)`, cache, có fallback | Test `Http::fake` |
 | Dò mã / mật khẩu | Rate limit `access-code`, `login`, `api` | Test khóa đăng nhập |
 | Truy vấn không index | Chỉ số theo đúng điều kiện lọc (xem `docs/database.md`) | Log truy vấn chậm |
+
+## Cache HTTP và cache toàn trang
+
+| Lớp | Cách làm | File |
+|---|---|---|
+| API danh mục công khai | `Cache-Control: public, max-age=300` + `ETag`; client gửi `If-None-Match` đúng thì nhận **304** rỗng | `routes/api.php` (middleware `cache.headers`) |
+| API thời tiết | `public, max-age=600` + `ETag` | `routes/api.php` |
+| API cần token | `Cache-Control: no-store, private` để trình duyệt/proxy không lưu dữ liệu cá nhân | `app/Http/Middleware/NoStoreResponse.php` |
+| Trang chủ, liên hệ (khách chưa đăng nhập) | Cache toàn trang HTML 10 phút (prerender lần đầu, các lần sau trả thẳng, header `X-Page-Cache: HIT`); token CSRF được điền lại theo phiên; đổi chi nhánh/phòng thì dựng lại | `app/Http/Middleware/CachePublicPage.php`, `app/Observers/CatalogObserver.php` |
+| Asset Vite (`/build/*`) | Tên file có hash nên cache 1 năm `immutable` | `deploy/docker/nginx-cache.conf`, `backend/public/.htaccess` |

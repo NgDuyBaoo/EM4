@@ -1,7 +1,10 @@
 <?php
 
 use App\Exceptions\BookingException;
+use App\Http\Middleware\CachePublicPage;
 use App\Http\Middleware\EnsureStaff;
+use App\Http\Middleware\NoStoreResponse;
+use App\Monitoring\ErrorAlert;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -24,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'staff' => EnsureStaff::class,
+            'page-cache' => CachePublicPage::class,
+            'no-store' => NoStoreResponse::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);
@@ -57,6 +62,11 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($r->is('api/*')) {
                 return response()->json(['message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR', 'errors' => $e->errors()], 422);
             }
+        });
+
+        // Lỗi nghiêm trọng (500): ghi log như mặc định và báo ngay cho chủ tiệm qua email/Slack.
+        $exceptions->report(function (Throwable $e) {
+            ErrorAlert::report($e);
         });
 
         // Thêm ngữ cảnh vào mọi log lỗi để dễ tra

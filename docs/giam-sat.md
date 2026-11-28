@@ -26,3 +26,25 @@ Ngoài ghi log, mỗi lần vượt ngưỡng hệ thống còn **gửi cảnh b
 - Email tới `NGOI_ALERT_MAIL`, để trống thì gửi cho mọi tài khoản chủ cửa hàng.
 - Slack nếu đặt `NGOI_ALERT_SLACK_WEBHOOK` (Incoming Webhook).
 - Cùng một câu SQL chỉ báo 1 lần trong `NGOI_SLOW_QUERY_ALERT_THROTTLE` phút (mặc định 10) để không gửi dồn dập. Tắt bằng `NGOI_SLOW_QUERY_ALERT=false`.
+
+## Cảnh báo lỗi nghiêm trọng
+
+Mọi exception không được xử lý (khách nhận trang lỗi 500) được ghi log như mặc định và **báo ngay** cho chủ tiệm (`app/Monitoring/ErrorAlert.php`, job `SendErrorAlert` chạy qua queue):
+
+- Gửi cùng nơi nhận với cảnh báo truy vấn chậm: email `NGOI_ALERT_MAIL` (để trống thì gửi mọi tài khoản chủ cửa hàng) và Slack `NGOI_ALERT_SLACK_WEBHOOK`.
+- Không báo lỗi nghiệp vụ (`BookingException`), lỗi 4xx, lỗi validate.
+- Cùng một lỗi (class + file + dòng) chỉ báo 1 lần / `NGOI_ERROR_ALERT_THROTTLE` phút (mặc định 10). Tắt bằng `NGOI_ERROR_ALERT=false`.
+- Lỗi SQL chỉ gửi câu lệnh có dấu `?`, không gửi giá trị (tránh lộ tên, số điện thoại khách qua email/Slack).
+
+## Giám sát máy chủ: mạng và cảnh báo theo ngưỡng
+
+Container `pulse` chạy `php artisan pulse:check`, ngoài recorder mặc định (CPU, RAM, đĩa) còn có 2 recorder tự viết:
+
+| Recorder | Việc làm | Xem ở đâu |
+|---|---|---|
+| `App\Pulse\Recorders\Network` | Đọc `/proc/net/dev` mỗi 15 giây, tính tốc độ nhận/gửi (byte/giây), lưu trung bình và cao nhất | Thẻ **Mạng** trên `/pulse` (`frontend/resources/views/vendor/pulse/dashboard.blade.php`) |
+| `App\Pulse\Recorders\ServerThresholds` | Mỗi phút kiểm CPU, RAM, đĩa; vượt ngưỡng thì gửi email/Slack (job `SendServerAlert`), mỗi chỉ số báo tối đa 1 lần / 30 phút | Email, Slack |
+
+Ngưỡng mặc định: CPU 85%, RAM 90%, đĩa 90%. Đổi bằng `NGOI_ALERT_CPU_PERCENT`, `NGOI_ALERT_MEMORY_PERCENT`, `NGOI_ALERT_DISK_PERCENT`; tắt bằng `NGOI_SERVER_ALERT=false`.
+
+Khi tải cao nên để Pulse ghi qua Redis (`PULSE_INGEST_DRIVER=redis`, Redis đã có trong `deploy/docker-compose.yml`) để không ghi trực tiếp vào MySQL chính.
