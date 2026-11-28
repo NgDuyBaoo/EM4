@@ -1,33 +1,42 @@
 # Đối chiếu tiêu chí chấm điểm
 
-Bảng dưới chỉ ra từng tiêu chí trong đề và file chứng minh trong repo. Đường dẫn tính từ thư mục gốc.
+Bảng dưới chỉ ra từng tiêu chí và nơi chứng minh trong repo (đường dẫn tính từ thư mục gốc). Cập nhật ngày 28/11/2026, sau khi merge PR #31–#37.
 
-| Task | Tiêu chí | Đã làm | Bằng chứng |
-|---|---|---|---|
-| 1. Git (1đ) | Repo có cấu trúc, commit rõ ràng, Issue, workflow | Commit theo Conventional Commits, mẫu Issue/PR, nhãn, script tạo Issue, CI | `git log`, `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`, `.github/labels.yml`, `scripts/create-github-issues.sh`, `docs/workflow-du-an.md`, `docs/huong-dan-github.md` |
-| 2. Database (1đ) | Migration, seeder, quan hệ, ràng buộc | 5 bảng nghiệp vụ, khóa ngoại, chỉ mục, cột sinh `active_slot` + UNIQUE chống đặt trùng, seeder có booking mẫu | `backend/database/migrations/`, `backend/database/seeders/`, `backend/database/factories/`, `docs/database.md` |
-| 3. UI (3đ) | Laravel Blade/Livewire + Tailwind | Blade layout + 8 component Livewire, Tailwind 4 | `frontend/resources/views/`, `frontend/resources/css/app.css`, `backend/app/Livewire/` |
-| | Đăng ký, đăng nhập | Form đăng ký/đăng nhập, giới hạn 5 lần thử | `backend/app/Http/Controllers/Web/AuthController.php`, `backend/app/Http/Requests/Web/` |
-| | CSRF + validate phía server | `@csrf` trên mọi form, FormRequest, Livewire `rules()` | `frontend/resources/views/auth/`, `backend/app/Http/Requests/` |
-| | Truy vấn, lọc | Lọc booking theo ngày/chi nhánh/trạng thái/từ khóa, phân trang, `#[Url]` | `backend/app/Livewire/Admin/Bookings.php` |
-| | API bên ngoài (1đ) | Thời tiết Open-Meteo (timeout, retry, cache), ảnh QR chuyển khoản VietQR | `backend/app/Services/WeatherService.php`, `backend/app/Services/VietQr.php` |
-| | Test (1đ) | Test Feature cho web và Livewire | `backend/tests/Feature/Web/` |
-| 4. REST API (2đ) | Resource controller, CRUD đầy đủ | `apiResource` cho branches, rooms, bookings, messages | `backend/routes/api.php`, `backend/app/Http/Controllers/Api/` |
-| | Sanctum | Token có ability `customer`/`staff`, middleware `abilities` | `backend/app/Http/Controllers/Api/AuthController.php`, `backend/bootstrap/app.php` |
-| | Scramble | Tài liệu tại `/docs/api`, xuất `docs/api/openapi.json` (19 path) | `backend/config/scramble.php`, `docs/api/openapi.json`, `docs/api.md` |
-| | Test | Test API cho auth, danh mục, booking, admin | `backend/tests/Feature/Api/` |
-| 5. Logging/Monitoring (1đ) | Telescope | Bật, chỉ chủ tiệm xem được | `backend/app/Providers/TelescopeServiceProvider.php` |
-| | Xử lý lỗi, log | `BookingException` có mã lỗi, JSON lỗi thống nhất cho API, trang lỗi riêng, kênh log `booking` | `backend/app/Exceptions/BookingException.php`, `backend/bootstrap/app.php`, `frontend/resources/views/errors/` |
-| | Cảnh báo truy vấn chậm | `DB::listen` theo ngưỡng `NGOI_SLOW_QUERY_MS`, `whenQueryingForLongerThan`, kênh log `slow-query` | `backend/app/Providers/AppServiceProvider.php`, `docs/giam-sat.md` |
-| | Giám sát máy chủ | Laravel Pulse (`/pulse`), health check `/api/health`, healthcheck Docker | `backend/config/pulse.php`, `backend/app/Http/Controllers/Api/SystemController.php`, `deploy/` |
-| 6. Hiệu năng (2đ) | Xử lý bất đồng bộ | Job gửi xác nhận qua queue, scheduler hủy khách không đến | `backend/app/Jobs/`, `backend/app/Console/Commands/CancelNoShows.php`, `backend/routes/console.php` |
-| | Tải tài nguyên | Vite build + prefetch, `wire:navigate`, `#[Lazy]` cho báo cáo | `backend/vite.config.js`, `backend/app/Livewire/Admin/Reports.php` |
-| | Cache | Cache danh mục, lịch trống, báo cáo, thời tiết; xóa cache bằng observer | `backend/app/Services/`, `backend/app/Observers/` |
-| | Chống antipattern | Eager loading, `Model::shouldBeStrict()` chặn N+1, `withCount/withSum`, insert theo lô | `docs/hieu-nang.md` |
+| Mục | Tiêu chí | Bằng chứng |
+|---|---|---|
+| 1a | Source code trên GitHub | https://github.com/NgDuyBaoo/NgoiBooking |
+| 1b | Commit đúng chuẩn | Conventional Commits; từ PR #39 ghi số issue ở tiêu đề `type(scope): mô tả (#n)` (xem `CONTRIBUTING.md`) |
+| 1c | GitHub Issues | Issue có mô tả, **Tiêu chí hoàn thành**, nhãn và người nhận; mẫu ở `.github/ISSUE_TEMPLATE/` |
+| 1d | Workflow (nhánh, PR, nối issue) | PR #21, #24, #25, #31–#37 từ nhánh chủ đề, có `Closes #n`, CI chạy trên PR; quy trình review ở `CONTRIBUTING.md` |
+| 2a | Thiết kế CSDL, migration | `backend/database/migrations/`, ERD trong `docs/database.md` |
+| 2b | Seed | `backend/database/seeders/`, `backend/database/factories/`; CI chạy `migrate:fresh --seed` trên MySQL |
+| 3a | Blade/Livewire + Tailwind | `frontend/resources/views/`, `backend/app/Livewire/` |
+| 3b | Đăng ký, đăng nhập | `backend/app/Http/Controllers/Web/AuthController.php`, `backend/app/Http/Requests/Web/` |
+| 3c | CSRF + validate server | `@csrf`, FormRequest, test 419 `backend/tests/Feature/Web/AuthWebTest.php` |
+| 3e | Truy vấn, lọc | `backend/app/Livewire/Admin/Bookings.php` |
+| 3f | API bên ngoài | Open-Meteo `WeatherService`, VietQR `BankDirectory` + `VietQr` (có hỗ trợ khóa `x-client-id`/`x-api-key`); lệnh `ngoi:check-integrations` chạy trên CI; kết quả thật ở `docs/integrations/README.md` |
+| 3g | Unit + integration test (web) | `backend/tests/Unit/`, `backend/tests/Feature/Web/`, `backend/tests/Feature/Services/` |
+| 4a | Resource controller CRUD | `backend/routes/api.php`, `backend/app/Http/Controllers/Api/`, `backend/app/Http/Resources/` |
+| 4b | Sanctum | Token có ability `customer`/`staff`; đổi trạng thái booking cần `tokenCan('staff')` |
+| 4c | Scramble | `/docs/api`, `docs/api/openapi.json`, CI chạy `scramble:analyze` |
+| 4d | Test API | `backend/tests/Feature/Api/`, `backend/tests/Unit/PolicyTest.php`, `BookingResourceTest.php` |
+| 5a | Telescope | `backend/app/Providers/TelescopeServiceProvider.php` |
+| 5b | Xử lý lỗi, logging | `backend/bootstrap/app.php`; lỗi 500 báo email/Slack `backend/app/Monitoring/ErrorAlert.php`; `docs/giam-sat.md` |
+| 5c | Cảnh báo truy vấn chậm | `backend/app/Monitoring/SlowQueryAlert.php`, job `SendSlowQueryAlert` |
+| 5d | Giám sát server | Pulse + recorder `Network`, `ServerThresholds` (`backend/app/Pulse/Recorders/`), thẻ Mạng trên `/pulse`; ảnh chụp: xem `docs/assets/README.md` |
+| 6a | Bất đồng bộ | Job `SendBookingConfirmation`, `SendSlowQueryAlert`, `SendErrorAlert`, `SendServerAlert`; scheduler `backend/routes/console.php` |
+| 6b | Tối ưu tải tài nguyên | Vite build + prefetch, `wire:navigate`, `#[Lazy]`, ảnh `loading="lazy"`, cache toàn trang `CachePublicPage`, asset `immutable` |
+| 6c | Cache | Cache dữ liệu phía server + header `Cache-Control`/`ETag` (304), `no-store` cho API cần token; `docs/hieu-nang.md` |
+| 6d | Antipattern | Eager loading, `Model::shouldBeStrict()`, test đếm truy vấn |
 
-## Kết quả kiểm tra
+## Kết quả kiểm tra (commit `4bfeb07`)
 
-- `php artisan test`: 75 test, 299 assertion, đều đạt trên SQLite và MySQL.
+- `php artisan test`: 180 test, 562 assertion, đều đạt (SQLite); CI chạy thêm MySQL 8.4.
 - `vendor/bin/pint --test`: sạch.
-- `php artisan scramble:analyze`: không cảnh báo.
-- Docker build và GitHub Actions chưa chạy thử được trong môi trường làm bài, cần chạy khi đẩy lên GitHub.
+- GitHub Actions: Pint, test SQLite, test MySQL, Scramble, gọi thật API ngoài, build Docker đều xanh.
+
+## Còn thiếu
+
+- Ảnh chụp dashboard `/pulse` và ảnh cảnh báo thật (cần chạy Docker), xem `docs/assets/README.md`.
+- Ảnh phòng thật để dùng WebP + `srcset` (6b).
+- Các PR từ #21 đến #37 chưa có review; từ PR #39 trở đi mỗi PR cần ít nhất 1 Approve.
