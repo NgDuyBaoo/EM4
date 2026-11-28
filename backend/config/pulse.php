@@ -1,5 +1,7 @@
 <?php
 
+use App\Pulse\Recorders\Network;
+use App\Pulse\Recorders\ServerThresholds;
 use Laravel\Pulse\Http\Middleware\Authorize;
 use Laravel\Pulse\Pulse;
 use Laravel\Pulse\Recorders;
@@ -170,6 +172,10 @@ return [
             'server_name' => env('PULSE_SERVER_NAME', gethostname()),
             'directories' => explode(':', env('PULSE_SERVER_DIRECTORIES', '/')),
         ],
+
+        // Recorder tự viết của Ngói: lưu lượng mạng và cảnh báo vượt ngưỡng CPU/RAM/đĩa (chạy trong pulse:check)
+        Network::class => [],
+        ServerThresholds::class => [],
 
         Recorders\SlowJobs::class => [
             'enabled' => env('PULSE_SLOW_JOBS_ENABLED', true),
