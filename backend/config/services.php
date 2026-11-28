@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    // VietQR API có xác thực (đăng ký miễn phí tại https://my.vietqr.io để lấy Client ID / API Key).
+    // Không cấu hình thì dùng link ảnh nhanh img.vietqr.io (không cần khóa).
+    'vietqr' => [
+        'client_id' => env('VIETQR_CLIENT_ID'),
+        'api_key' => env('VIETQR_API_KEY'),
+        'generate_url' => 'https://api.vietqr.io/v2/generate',
+    ],
+
 ];
