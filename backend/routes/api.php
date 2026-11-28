@@ -12,23 +12,26 @@ use Illuminate\Support\Facades\Route;
 // Tài liệu API (Scramble): /docs/api   ·   OpenAPI JSON: /docs/api.json
 
 Route::get('health', [SystemController::class, 'health'])->name('api.health');
-Route::get('weather', [SystemController::class, 'weather'])->name('api.weather');
+Route::get('weather', [SystemController::class, 'weather'])->middleware('cache.headers:public;max_age=600;etag')->name('api.weather');
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:login');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'no-store'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
 
 // Công khai: xem danh mục, gửi lời nhắn
-Route::apiResource('branches', BranchController::class)->only(['index', 'show']);
-Route::apiResource('rooms', RoomController::class)->only(['index', 'show']);
+// Danh mục ít đổi: cho trình duyệt/CDN cache 5 phút, ETag để trả 304 khi không đổi
+Route::middleware('cache.headers:public;max_age=300;etag')->group(function () {
+    Route::apiResource('branches', BranchController::class)->only(['index', 'show']);
+    Route::apiResource('rooms', RoomController::class)->only(['index', 'show']);
+});
 Route::post('messages', [MessageController::class, 'store'])->middleware('throttle:access-code');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'no-store'])->group(function () {
     Route::get('branches/{branch}/availability', [BranchController::class, 'availability'])->middleware('throttle:access-code');
     Route::apiResource('bookings', BookingController::class);
 
