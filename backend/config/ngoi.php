@@ -46,6 +46,15 @@ return [
         'banks_url' => 'https://api.vietqr.io/v2/banks',
     ],
 
+    // Ảnh phông nền phòng chụp (trang chủ). File ở public/images/backdrops/<slug>-<rộng>.webp, tạo bằng scripts/optimize-images.py.
+    // width/height: tỉ lệ ảnh gốc, dùng cho thuộc tính width/height để trình duyệt giữ chỗ (không bị nhảy layout).
+    'backdrops' => [
+        ['slug' => 'do-do-sao-bac', 'name' => 'Đỏ đô sao bạc', 'width' => 1200, 'height' => 1600],
+        ['slug' => 'da-bao', 'name' => 'Da báo', 'width' => 1200, 'height' => 1600],
+        ['slug' => 'nau-hong-van-loang', 'name' => 'Nâu hồng vân loang', 'width' => 1600, 'height' => 1066],
+        ['slug' => 'kem-cham-bi', 'name' => 'Kem chấm bi nâu', 'width' => 1600, 'height' => 1066],
+    ],
+
     // Dự báo thời tiết Huế từ Open-Meteo (miễn phí, không cần API key).
     'weather' => [
         'url' => 'https://api.open-meteo.com/v1/forecast',
