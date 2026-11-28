@@ -28,6 +28,8 @@ ENV APP_BASE_DIR=/var/www/html/backend \
     TZ=Asia/Ho_Chi_Minh
 USER root
 RUN install-php-extensions intl bcmath
+# Header cache cho asset tĩnh (Vite build có hash)
+COPY deploy/docker/nginx-cache.conf /etc/nginx/server-opts.d/ngoi-cache.conf
 USER www-data
 WORKDIR /var/www/html
 COPY --chown=www-data:www-data data ./data

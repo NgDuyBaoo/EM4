@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\EnsureStaff;
+use App\Livewire\Pulse\Network as PulseNetworkCard;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Room;
@@ -48,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Mọi request cập nhật component Livewire (gọi action) đều chạy lại middleware kiểm quyền của trang
         Livewire::addPersistentMiddleware([EnsureStaff::class]);
+        // Thẻ "Mạng" trên dashboard /pulse
+        Livewire::component('ngoi-pulse-network', PulseNetworkCard::class);
 
         // Prefetch asset Vite để trang tải nhanh hơn
         Vite::prefetch(concurrency: 3);
