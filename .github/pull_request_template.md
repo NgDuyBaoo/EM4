@@ -1,7 +1,12 @@
+<!-- Tiêu đề PR: type(scope): mô tả (#số-issue). Xem CONTRIBUTING.md -->
+
 ## Thay đổi
 <!-- Tóm tắt -->
 
 Closes #
+
+## Người review
+<!-- Gắn ít nhất 1 thành viên khác trong nhóm ở mục Reviewers; chỉ merge khi đã có Approve -->
 
 ## Kiểm tra
 - [ ] `vendor/bin/pest` đạt
