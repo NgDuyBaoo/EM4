@@ -26,6 +26,11 @@ khởi động container chạy `config:cache`, `route:cache`, `view:cache`, `ev
 - `Vite::prefetch()` tải trước asset; `wire:navigate` chuyển trang kiểu SPA (không tải lại CSS/JS).
 - Trang Thống kê dùng `#[Lazy]`: hiện khung chờ ngay, số liệu tải sau.
 - Ảnh VietQR `loading="lazy"` có `width/height` cố định (không giật layout); font Google có `preconnect` + `display=swap`.
+- Ảnh phông nền trên trang chủ (`<x-responsive-image>`, `App\Support\ResponsiveImage`):
+  - Mỗi ảnh có 3 bản **WebP** (480, 800, 1200px) và 1 bản JPEG 800px dự phòng. Thẻ `<picture>` + `srcset`/`sizes` để trình duyệt tải đúng cỡ: màn hình máy tính (thẻ rộng 240px) và điện thoại đều chỉ tải bản 480px, khoảng 9–140 KB mỗi ảnh, thay vì ảnh gốc 0,6–1 MB.
+  - `loading="lazy"`, `decoding="async"`, có `width`/`height` để không nhảy layout.
+  - Ảnh được tạo bằng `scripts/optimize-images.py` (Pillow): thu nhỏ ảnh nguồn còn tối đa 1600px, lưu ở `design/photos/backdrops/`, bỏ EXIF, ảnh hoa văn dày tự giảm chất lượng cho tới khi dưới ~200 KB.
+  - Test `tests/Feature/Web/ResponsiveImageTest.php` kiểm tra HTML, đủ file, mỗi file dưới 300 KB, không còn EXIF và tỉ lệ khớp `width`/`height`.
 - Danh sách dùng phân trang (`paginate`), API giới hạn `per_page ≤ 100`; lịch tự làm mới bằng `wire:poll.30s` thay vì tải lại trang.
 
 ## Tránh antipattern

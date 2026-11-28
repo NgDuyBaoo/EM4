@@ -25,7 +25,7 @@ Bảng dưới chỉ ra từng tiêu chí và nơi chứng minh trong repo (đư
 | 5c | Cảnh báo truy vấn chậm | `backend/app/Monitoring/SlowQueryAlert.php`, job `SendSlowQueryAlert` |
 | 5d | Giám sát server | Pulse + recorder `Network`, `ServerThresholds` (`backend/app/Pulse/Recorders/`), thẻ Mạng trên `/pulse`; ảnh chụp: xem `docs/assets/README.md` |
 | 6a | Bất đồng bộ | Job `SendBookingConfirmation`, `SendSlowQueryAlert`, `SendErrorAlert`, `SendServerAlert`; scheduler `backend/routes/console.php` |
-| 6b | Tối ưu tải tài nguyên | Vite build + prefetch, `wire:navigate`, `#[Lazy]`, ảnh `loading="lazy"`, cache toàn trang `CachePublicPage`, asset `immutable` |
+| 6b | Tối ưu tải tài nguyên | Vite build + prefetch, `wire:navigate`, `#[Lazy]`; ảnh phông nền thật dạng **WebP 480/800/1200 + `srcset`/`sizes`**, `loading="lazy"`, bỏ EXIF (`scripts/optimize-images.py`, `<x-responsive-image>`); cache toàn trang `CachePublicPage`, asset `immutable` |
 | 6c | Cache | Cache dữ liệu phía server + header `Cache-Control`/`ETag` (304), `no-store` cho API cần token; `docs/hieu-nang.md` |
 | 6d | Antipattern | Eager loading, `Model::shouldBeStrict()`, test đếm truy vấn |
 
@@ -38,5 +38,4 @@ Bảng dưới chỉ ra từng tiêu chí và nơi chứng minh trong repo (đư
 ## Còn thiếu
 
 - Ảnh chụp dashboard `/pulse` và ảnh cảnh báo thật (cần chạy Docker), xem `docs/assets/README.md`.
-- Ảnh phòng thật để dùng WebP + `srcset` (6b).
 - Các PR từ #21 đến #37 chưa có review; từ PR #39 trở đi mỗi PR cần ít nhất 1 Approve.
