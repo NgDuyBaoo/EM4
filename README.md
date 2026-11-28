@@ -24,7 +24,7 @@ Cần PHP 8.3, Composer, Node 20, MySQL 8 (hoặc SQLite).
 ./scripts/dev.sh            # server, queue, scheduler, vite cùng lúc
 ```
 
-Mở http://localhost:8000. Tài khoản mẫu (mật khẩu `password`):
+Mở http://localhost:8000. Tài khoản mẫu, **chỉ được tạo khi `APP_ENV=local`** (mật khẩu `password`). Ở môi trường khác seeder bắt buộc đặt `SEED_ADMIN_PASSWORD` và chỉ tạo tài khoản chủ cửa hàng:
 
 | Vai trò | Email |
 |---|---|
