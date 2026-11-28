@@ -50,6 +50,13 @@ cd backend && php artisan test --coverage
 
 ## Tài liệu
 
+## Thành viên nhóm
+
+| Thành viên | GitHub | Phụ trách |
+|---|---|---|
+| [Họ tên của bạn] | [@vinhkhang2302](https://github.com/vinhkhang2302) | [Phần việc đã thống nhất] |
+| [Họ tên thành viên] | [@NgDuyBaoo](https://github.com/NgDuyBaoo) | [Phần việc đã thống nhất] |
+
 - [Đặc tả yêu cầu](docs/dac-ta-yeu-cau.md)
 - [Kiến trúc](docs/kien-truc.md) · [Database](docs/database.md) · [API](docs/api.md)
 - [Giám sát và log](docs/giam-sat.md) · [Hiệu năng](docs/hieu-nang.md)
