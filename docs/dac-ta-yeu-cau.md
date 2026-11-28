@@ -113,7 +113,7 @@ stateDiagram-v2
 | FR-U03 | Chọn phòng | Hiện phòng đang hoạt động: tên, phong cách, mô tả, giá/slot. Chọn được nhiều phòng |
 | FR-U04 | Chọn khung giờ | Lưới slot 10 phút, chia theo khoảng 2 giờ, mở sẵn khoảng giờ hiện tại. Slot đã đặt / đã qua bị gạch, không bấm được. Chọn nhiều slot, xem tổng tiền. Lịch tự làm mới mỗi 30 giây |
 | FR-U05 | Xác nhận | Hiện lại chi nhánh, phòng, giờ, tổng tiền. Nhập tên (bắt buộc) và SĐT VN 10 số. Nếu slot vừa bị người khác đặt → quay lại bước 4, bỏ slot đó, báo rõ |
-| FR-U06 | Thành công | Hiện mã booking `NGxxxxxx`, chi tiết, mã **VietQR** để chuyển khoản trước, gửi **email xác nhận** qua hàng đợi |
+| FR-U06 | Thành công | Hiện mã booking `NGxxxxxx`, chi tiết, mã **VietQR** để chuyển khoản trước, gửi **tin Zalo ZNS xác nhận** tới SĐT khách qua hàng đợi (không dùng email); nhắc trước giờ chụp và báo khi lịch bị hủy cũng qua Zalo |
 | FR-U09 | Thời tiết | Trang chủ và bước chọn giờ hiện thời tiết Huế hôm nay từ **Open-Meteo** (cache 30 phút, API lỗi thì ẩn) |
 | FR-U07 | Lịch của tôi | Liệt kê booking của tài khoản (phân trang); tự hủy các slot chưa bắt đầu (có bước xác nhận) |
 | FR-U08 | Liên hệ | Gửi lời nhắn (chi nhánh, chủ đề, tên, SĐT/email, nội dung). Xem địa chỉ, link Google Maps |

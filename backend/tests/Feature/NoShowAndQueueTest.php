@@ -1,13 +1,10 @@
 <?php
 
 use App\Enums\BookingStatus;
-use App\Jobs\SendBookingConfirmation;
 use App\Models\Booking;
-use App\Notifications\BookingConfirmed;
 use App\Services\AvailabilityService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
     [$this->b1] = seedBranches();
@@ -30,14 +27,6 @@ it('lệnh lập lịch tự hủy booking quá 15 phút chưa check-in (BR-07)'
 it('lệnh tự hủy được đăng ký chạy mỗi 5 phút', function () {
     $events = collect(app(Schedule::class)->events());
     expect($events->first(fn ($e) => str_contains($e->command, 'bookings:cancel-no-shows'))->expression)->toBe('*/5 * * * *');
-});
-
-it('job gửi email xác nhận chạy được và gửi tới đúng khách', function () {
-    Notification::fake();
-    $u = customer();
-    Booking::factory()->for($this->room)->create(['branch_id' => $this->b1->id, 'user_id' => $u->id, 'booking_code' => 'NGTEST01']);
-    (new SendBookingConfirmation('NGTEST01', $u->id))->handle();
-    Notification::assertSentTo($u, BookingConfirmed::class, fn ($n) => $n->toMail($u)->subject === 'Ngói Photobooth – Xác nhận lịch chụp NGTEST01');
 });
 
 it('cache lịch trống được xóa ngay khi có booking mới', function () {

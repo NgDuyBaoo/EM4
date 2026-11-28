@@ -16,7 +16,7 @@ class Booking extends Model
     protected $fillable = [
         'booking_code', 'user_id', 'branch_id', 'room_id', 'booking_date', 'slot_time',
         'customer_name', 'customer_phone', 'source', 'status', 'price', 'note',
-        'checked_in_at', 'completed_at', 'cancelled_at', 'cancel_reason',
+        'checked_in_at', 'completed_at', 'cancelled_at', 'cancel_reason', 'reminded_at',
     ];
 
     protected function casts(): array
@@ -29,6 +29,7 @@ class Booking extends Model
             'checked_in_at' => 'datetime',
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'reminded_at' => 'datetime',
         ];
     }
 

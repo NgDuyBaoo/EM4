@@ -3,7 +3,7 @@
 ## Xử lý bất đồng bộ
 | Việc | Cách làm |
 |------|---------|
-| Gửi email xác nhận booking | `App\Jobs\SendBookingConfirmation` (ShouldQueue, thử lại 3 lần, backoff 10s/60s). Khách nhận kết quả ngay, không chờ SMTP |
+| Gửi tin Zalo ZNS cho khách (xác nhận, nhắc lịch, báo hủy) | `App\Jobs\SendBookingZalo` (ShouldQueue, thử lại 3 lần, backoff 10s/60s). Khách nhận kết quả ngay, không chờ gọi API Zalo |
 | Tự hủy booking quá giờ | Lệnh `bookings:cancel-no-shows`, scheduler chạy mỗi 5 phút (`routes/console.php`) |
 | Dọn dữ liệu giám sát | `telescope:prune`, `sanctum:prune-expired` hằng ngày |
 | Thu thập số liệu máy chủ | `pulse:check` chạy nền |

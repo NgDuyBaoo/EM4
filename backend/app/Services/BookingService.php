@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
 use App\Exceptions\BookingException;
-use App\Jobs\SendBookingConfirmation;
+use App\Jobs\SendBookingZalo;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\User;
@@ -101,17 +101,17 @@ class BookingService
         });
 
         Log::channel('booking')->info('Tạo booking', ['code' => $code, 'branch' => $branch->code, 'slots' => count($rows), 'source' => $source->value]);
-        if ($user?->email) {
-            SendBookingConfirmation::dispatch($code, $user->id); // gửi email xác nhận qua queue
+        if ($source === BookingSource::Online) {
+            SendBookingZalo::dispatch('confirmed', $bookings->pluck('id')->all()); // tin Zalo xác nhận tới SĐT khách, qua queue
         }
 
         return $bookings->each->load(['room', 'branch']);
     }
 
-    /** Admin/nhân viên đổi trạng thái theo vòng đời. */
-    public function transition(Booking $booking, BookingStatus $to, string $reason = ''): Booking
+    /** Admin/nhân viên đổi trạng thái theo vòng đời. Khi hủy lịch online, báo khách qua Zalo nếu $notify. */
+    public function transition(Booking $booking, BookingStatus $to, string $reason = '', bool $notify = true): Booking
     {
-        return DB::transaction(function () use ($booking, $to, $reason) {
+        return DB::transaction(function () use ($booking, $to, $reason, $notify) {
             $fresh = Booking::query()->lockForUpdate()->findOrFail($booking->id);
             if (! $fresh->status->canTransitionTo($to)) {
                 throw new BookingException('INVALID_TRANSITION', "Không thể chuyển từ \"{$fresh->status->label()}\" sang \"{$to->label()}\".", 409);
@@ -125,6 +125,9 @@ class BookingService
             };
             $fresh->save();
             Log::channel('booking')->info('Đổi trạng thái', ['id' => $fresh->id, 'to' => $to->value]);
+            if ($notify && $to === BookingStatus::Cancelled && $fresh->source === BookingSource::Online) {
+                SendBookingZalo::dispatch('cancelled', [$fresh->id])->afterCommit();
+            }
 
             return $fresh->load(['room', 'branch']);
         });
@@ -137,7 +140,8 @@ class BookingService
             throw new BookingException('NOT_CANCELLABLE', 'Không thể hủy: lịch đã qua giờ hoặc đã check-in.', 409);
         }
 
-        return $this->transition($booking, BookingStatus::Cancelled, 'Khách tự hủy');
+        // Khách tự hủy trên web, đã thấy kết quả ngay nên không gửi Zalo.
+        return $this->transition($booking, BookingStatus::Cancelled, 'Khách tự hủy', notify: false);
     }
 
     /** Hủy các booking quá giờ hẹn mà khách chưa đến (BR-07). Trả về số booking đã hủy. */
@@ -149,13 +153,18 @@ class BookingService
             return 0;
         }
 
-        return Booking::query()
+        $cancelled = Booking::query()
             ->onDate(SlotClock::today())
             ->where('status', BookingStatus::Booked)
             ->where('slot_time', '<=', $cutoff->format('H:i:s'))
             ->get()
-            ->each(fn (Booking $b) => $this->transition($b, BookingStatus::Cancelled, "Tự hủy: quá {$grace} phút chưa check-in"))
-            ->count();
+            ->map(fn (Booking $b) => $this->transition($b, BookingStatus::Cancelled, "Tự hủy: quá {$grace} phút chưa check-in", notify: false));
+
+        // Mỗi mã booking chỉ 1 tin Zalo dù hủy nhiều slot cùng lúc.
+        $cancelled->where('source', BookingSource::Online)->groupBy('booking_code')
+            ->each(fn ($rows) => SendBookingZalo::dispatch('cancelled', $rows->pluck('id')->all()));
+
+        return $cancelled->count();
     }
 
     private function newCode(): string

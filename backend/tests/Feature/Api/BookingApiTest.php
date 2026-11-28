@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\BookingStatus;
-use App\Jobs\SendBookingConfirmation;
+use App\Jobs\SendBookingZalo;
 use App\Models\Booking;
 use App\Support\SlotClock;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -37,7 +37,7 @@ it('khách cần mã truy cập đúng để xem lịch trống', function () {
         ->and(collect($res->json('rooms.0.slots'))->firstWhere('time', '10:10')['state'])->toBe('free');
 });
 
-it('đặt lịch thành công, lưu giá, gửi email xác nhận qua queue', function () {
+it('đặt lịch thành công, lưu giá, gửi tin Zalo xác nhận qua queue', function () {
     Queue::fake();
     Sanctum::actingAs($this->customer);
     $res = $this->postJson('/api/bookings', book())->assertCreated();
@@ -46,7 +46,7 @@ it('đặt lịch thành công, lưu giá, gửi email xác nhận qua queue', f
         ->and($res->json('total'))->toBe(100000)
         ->and(Booking::where('user_id', $this->customer->id)->count())->toBe(2);
     $this->assertDatabaseHas('bookings', ['customer_phone' => '0912345678', 'slot_time' => '14:30:00']);
-    Queue::assertPushed(SendBookingConfirmation::class, fn ($job) => $job->bookingCode === $res->json('code'));
+    Queue::assertPushed(SendBookingZalo::class, fn ($job) => $job->kind === 'confirmed' && count($job->bookingIds) === 2);
 });
 
 it('sai mã truy cập thì không đặt được', function () {

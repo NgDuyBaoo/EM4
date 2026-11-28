@@ -38,6 +38,7 @@ erDiagram
       enum source
       enum status
       int price
+      timestamp reminded_at
       tinyint active_slot "generated" }
     access_codes { date code_date PK
       char code }

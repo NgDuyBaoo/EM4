@@ -15,7 +15,7 @@ flowchart LR
     L <--> R[("Redis<br/>cache · queue · session")]
     L -->|HTTP| OM["Open-Meteo<br/>thời tiết Huế"]
     U -->|ảnh QR| VQ["VietQR"]
-    Q["queue worker<br/>email xác nhận"] --> R
+    Q["queue worker<br/>tin Zalo ZNS cho khách"] --> R
     S["scheduler<br/>tự hủy booking trễ"] --> L
     L -.-> T["Telescope · Pulse · log"]
 ```
