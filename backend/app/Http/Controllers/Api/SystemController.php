@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\WeatherService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -18,9 +19,12 @@ class SystemController extends Controller
     /**
      * Kiểm tra sức khỏe hệ thống: database, cache, hàng đợi. Dùng cho Docker healthcheck / uptime monitor.
      *
+     * Công khai chỉ trả `ok` (200 hoặc 503). Chi tiết từng thành phần chỉ trả cho chủ cửa hàng (token Sanctum)
+     * hoặc request từ chính máy chủ (healthcheck nội bộ).
+     *
      * @unauthenticated
      */
-    public function health(): JsonResponse
+    public function health(Request $request): JsonResponse
     {
         $checks = [];
         $started = microtime(true);
@@ -44,7 +48,12 @@ class SystemController extends Controller
         }
         $ok = collect($checks)->every(fn ($c) => $c['ok']);
 
-        return response()->json(['ok' => $ok, 'time' => now()->toIso8601String(), 'checks' => $checks], $ok ? 200 : 503);
+        $detail = $request->user('sanctum')?->isOwner() || in_array($request->ip(), ['127.0.0.1', '::1'], true);
+
+        return response()->json(
+            $detail ? ['ok' => $ok, 'time' => now()->toIso8601String(), 'checks' => $checks] : ['ok' => $ok],
+            $ok ? 200 : 503,
+        );
     }
 
     /**

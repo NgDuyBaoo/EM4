@@ -14,7 +14,7 @@ class UpdateBookingRequest extends FormRequest
 
     public function rules(): array
     {
-        $staff = (bool) $this->user()?->isStaff();
+        $staff = (bool) $this->user()?->isStaff() && (bool) $this->user()?->tokenCan('staff');
 
         return [
             // Khách chỉ được "cancel". Nhân viên: checkin / complete / cancel và sửa thông tin khách.

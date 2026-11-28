@@ -11,7 +11,7 @@
 ```bash
 cp deploy/.env.example deploy/.env       # điền mật khẩu, APP_KEY
 docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
-docker compose -f deploy/docker-compose.yml exec app php artisan db:seed --force   # lần đầu: dữ liệu danh mục + admin
+docker compose -f deploy/docker-compose.yml exec -e SEED_ADMIN_PASSWORD="mật-khẩu-mạnh" app php artisan db:seed --force   # lần đầu: danh mục + tài khoản chủ cửa hàng (bắt buộc đặt mật khẩu)
 ```
 
 Container `app` tự chạy migration khi khởi động (`AUTORUN_LARAVEL_MIGRATION`). Đặt sau reverse proxy có HTTPS.

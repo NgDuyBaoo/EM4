@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureStaff;
 use App\Livewire\Pulse\Network as PulseNetworkCard;
 use App\Models\Booking;
 use App\Models\Branch;
@@ -46,6 +47,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimits();
         $this->configureApiDocs();
 
+        // Mọi request cập nhật component Livewire (gọi action) đều chạy lại middleware kiểm quyền của trang
+        Livewire::addPersistentMiddleware([EnsureStaff::class]);
         // Thẻ "Mạng" trên dashboard /pulse
         Livewire::component('ngoi-pulse-network', PulseNetworkCard::class);
 
@@ -65,7 +68,8 @@ class AppServiceProvider extends ServiceProvider
                 Log::channel('slow-query')->warning('Truy vấn chậm', [
                     'ms' => $query->time,
                     'sql' => $query->sql,
-                    'bindings' => $query->bindings,
+                    // Không ghi bindings: có thể chứa tên, số điện thoại, email khách. Câu SQL giữ dấu ? là đủ để tra.
+                    'bindings_count' => count($query->bindings),
                     'url' => request()?->fullUrl(),
                 ]);
                 SlowQueryAlert::report('query', $query->sql, $query->time, request()?->fullUrl());

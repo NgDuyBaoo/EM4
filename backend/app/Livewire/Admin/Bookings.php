@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Enums\BookingStatus;
 use App\Exceptions\BookingException;
+use App\Livewire\Concerns\RequiresStaff;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Services\BookingService;
@@ -18,6 +19,7 @@ use Livewire\WithPagination;
 #[Title('Quản lý booking – Ngói')]
 class Bookings extends Component
 {
+    use RequiresStaff;
     use WithPagination;
 
     #[Url]
@@ -50,6 +52,7 @@ class Bookings extends Component
 
     public function act(int $id, string $action, BookingService $service): void
     {
+        $this->ensureStaff();
         $to = ['checkin' => BookingStatus::CheckedIn, 'complete' => BookingStatus::Completed, 'cancel' => BookingStatus::Cancelled, 'late' => BookingStatus::Cancelled][$action];
         try {
             $b = $service->transition(Booking::findOrFail($id), $to, $action === 'late' ? 'Khách đến trễ' : 'Nhân viên hủy');
