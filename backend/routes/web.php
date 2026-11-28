@@ -6,8 +6,11 @@ use App\Livewire\Admin;
 use App\Livewire\Customer;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PageController::class, 'home'])->name('home');
-Route::get('/lien-he', [PageController::class, 'contact'])->name('contact');
+// Trang công khai: cache toàn trang cho khách chưa đăng nhập (middleware page-cache)
+Route::middleware('page-cache:600')->group(function () {
+    Route::get('/', [PageController::class, 'home'])->name('home');
+    Route::get('/lien-he', [PageController::class, 'contact'])->name('contact');
+});
 Route::post('/lien-he', [PageController::class, 'sendMessage'])->middleware('throttle:access-code')->name('contact.send');
 
 Route::middleware('guest')->group(function () {

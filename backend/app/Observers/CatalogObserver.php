@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Http\Middleware\CachePublicPage;
 use App\Services\AvailabilityService;
 use App\Support\SlotClock;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,7 @@ class CatalogObserver
     private function flush(Model $model): void
     {
         Cache::forget('catalog:branches');
+        CachePublicPage::flush(); // trang chủ, liên hệ hiện danh sách chi nhánh/phòng
         $branchId = $model->branch_id ?? $model->getKey();
         Cache::forget(AvailabilityService::cacheKey((int) $branchId, SlotClock::today()));
     }
