@@ -26,3 +26,12 @@ Ngoài ghi log, mỗi lần vượt ngưỡng hệ thống còn **gửi cảnh b
 - Email tới `NGOI_ALERT_MAIL`, để trống thì gửi cho mọi tài khoản chủ cửa hàng.
 - Slack nếu đặt `NGOI_ALERT_SLACK_WEBHOOK` (Incoming Webhook).
 - Cùng một câu SQL chỉ báo 1 lần trong `NGOI_SLOW_QUERY_ALERT_THROTTLE` phút (mặc định 10) để không gửi dồn dập. Tắt bằng `NGOI_SLOW_QUERY_ALERT=false`.
+
+## Cảnh báo lỗi nghiêm trọng
+
+Mọi exception không được xử lý (khách nhận trang lỗi 500) được ghi log như mặc định và **báo ngay** cho chủ tiệm (`app/Monitoring/ErrorAlert.php`, job `SendErrorAlert` chạy qua queue):
+
+- Gửi cùng nơi nhận với cảnh báo truy vấn chậm: email `NGOI_ALERT_MAIL` (để trống thì gửi mọi tài khoản chủ cửa hàng) và Slack `NGOI_ALERT_SLACK_WEBHOOK`.
+- Không báo lỗi nghiệp vụ (`BookingException`), lỗi 4xx, lỗi validate.
+- Cùng một lỗi (class + file + dòng) chỉ báo 1 lần / `NGOI_ERROR_ALERT_THROTTLE` phút (mặc định 10). Tắt bằng `NGOI_ERROR_ALERT=false`.
+- Lỗi SQL chỉ gửi câu lệnh có dấu `?`, không gửi giá trị (tránh lộ tên, số điện thoại khách qua email/Slack).
