@@ -129,3 +129,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -f deploy/docker/app.Dockerfile -t ngoi-app .
+      - name: Kiểm tra docker-compose (mọi container Laravel đều dùng MySQL)
+        run: |
+          cp deploy/.env.example deploy/.env
+          docker compose -f deploy/docker-compose.yml config --format json > /tmp/compose.json
+          for svc in app queue scheduler pulse; do
+            jq -e --arg s "$svc" '.services[$s].environment | .DB_CONNECTION == "mysql" and .APP_ENV == "production"' /tmp/compose.json > /dev/null \
+              || { echo "::error::service $svc thiếu DB_CONNECTION=mysql hoặc APP_ENV=production"; exit 1; }
+          done
+          echo "OK: app, queue, scheduler, pulse đều dùng MySQL"
