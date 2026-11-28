@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Livewire\Pulse\Network as PulseNetworkCard;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Room;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,6 +45,9 @@ class AppServiceProvider extends ServiceProvider
         $this->configureSlowQueryAlerts();
         $this->configureRateLimits();
         $this->configureApiDocs();
+
+        // Thẻ "Mạng" trên dashboard /pulse
+        Livewire::component('ngoi-pulse-network', PulseNetworkCard::class);
 
         // Prefetch asset Vite để trang tải nhanh hơn
         Vite::prefetch(concurrency: 3);
