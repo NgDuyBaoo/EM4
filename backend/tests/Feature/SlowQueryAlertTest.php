@@ -4,6 +4,7 @@ use App\Jobs\SendSlowQueryAlert;
 use App\Monitoring\SlowQueryAlert;
 use App\Notifications\SlowQueryDetected;
 use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -91,4 +92,21 @@ it('truy vấn phát sinh khi đang gửi cảnh báo không tạo cảnh báo m
     SlowQueryAlert::report('query', 'select * from users', 900);
 
     Notification::assertCount(1);
+});
+
+it('không báo câu lệnh thay đổi cấu trúc bảng (migration)', function () {
+    Queue::fake();
+
+    SlowQueryAlert::report('query', 'drop table if exists `cache`', 1200);
+    SlowQueryAlert::report('query', '  CREATE TABLE x (id int)', 900);
+    SlowQueryAlert::report('query', 'alter table bookings add column x int', 900);
+
+    Queue::assertNothingPushed();
+});
+
+it('lỗi khi gửi cảnh báo (ví dụ bảng cache bị xóa) không làm hỏng truy vấn gốc', function () {
+    config(['ngoi.slow_query_ms' => 0]);
+    Cache::shouldReceive('add')->andThrow(new RuntimeException("Table 'cache' doesn't exist"));
+
+    expect(DB::select('select 7 as van_chay')[0]->van_chay)->toBe(7);
 });
